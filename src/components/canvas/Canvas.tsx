@@ -1,74 +1,84 @@
 import { ComponentProps, FC, useEffect, useRef, useState } from "react";
 import { useDataContext } from "../../context/DataContext";
+import { useCanvasContext } from "../../context/CanvasContext";
 
 export const Canvas: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data } = useDataContext();
-	const [dimenstions, setDimenstions] = useState<{ height: number, width: number }>({
-		height: 300,
-		width: 900,
-	})
+	const { dimenstions } = useCanvasContext();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
 		if (!canvasRef.current) {
-			return
+			return;
 		}
 
 		const canvasCtx = canvasRef.current.getContext("2d");
 		if (!canvasCtx) {
-			return
+			return;
 		}
 
-		let mult = Math.floor(dimenstions.height / 10);
-		let curr = 16;
+		const height = canvasRef.current.height;
+		const width = canvasRef.current.width;
+		const yOffset = 16;
+		const xOffset = 50;
 
-		canvasCtx.font = "16px Arial";
+		const multY = (height - yOffset) / 10;
+		const multX = (width - xOffset) / (headers.length);
+
+		const maxVal = Math.floor(
+			data.flat().reduce(
+				(acc, val) => Math.max(acc, val)
+				, 0)
+		)
+
+		canvasCtx.font = `${yOffset}px Arial`;
 		canvasCtx.fillStyle = "black";
-
-		while (curr < dimenstions.height - 16) {
-			canvasCtx.fillText(`${curr}mm`, 0, curr)
-			curr += mult;
+		let yLabelValue = maxVal;
+		for (let y = yOffset; y < height - yOffset; y += multY) {
+			canvasCtx.fillText(`${yLabelValue}`, xOffset - 40, y);
+			yLabelValue = Math.floor(yLabelValue - maxVal / 10);
 		}
 
-		mult = Math.floor(dimenstions.width / (headers.length));
-		let index = 0;
-		curr = 100;
-
-		while (curr <= dimenstions.width) {
-			canvasCtx.fillText(`${index}`, curr, dimenstions.height);
-			curr += mult;
-			index++;
+		for (let i = 0; i < headers.length; i++) {
+			canvasCtx.fillText(headers[i], xOffset + i * multX, height);
 		}
 
 		const sideLine = new Path2D();
-		sideLine.moveTo(100, 0);
-		sideLine.lineTo(100, canvasRef.current.height - 16);
+		sideLine.moveTo(xOffset, 0);
+		sideLine.lineTo(xOffset, height - yOffset);
+
 		const bottomLine = new Path2D();
-		bottomLine.moveTo(100, canvasRef.current.height - 16);
-		bottomLine.lineTo(canvasRef.current.width, canvasRef.current.height - 16)
+		bottomLine.moveTo(xOffset, height - yOffset);
+		bottomLine.lineTo(width, height - yOffset);
 
 		canvasCtx.strokeStyle = "black";
 		canvasCtx.stroke(sideLine);
 		canvasCtx.stroke(bottomLine);
-	}, [dimenstions.height, dimenstions.width])
+
+		for (let i = 0; i < data[0].length; i++) {
+			const line = new Path2D();
+			line.moveTo(
+				xOffset,
+				height - yOffset - (data[0][i] / maxVal) * (height - yOffset)
+			);
+			for (let j = 1; j < data.length; j++) {
+				line.lineTo(
+					xOffset + j * multX,
+					height - yOffset - (data[j][i] / maxVal) * (height - yOffset)
+				);
+			}
+			canvasCtx.strokeStyle = `hsl(${(i * 360 / data.length)}, 100%, 50%)`;
+			canvasCtx.stroke(line);
+		}
+
+		return () => canvasCtx.clearRect(0, 0, width, height);
+	}, [canvasRef, data, headers, dimenstions.height, dimenstions.width]);
 
 	return (<div>
 		<canvas width={dimenstions.width} height={dimenstions.height}
 			ref={canvasRef}
 		>
 		</canvas>
-		<input type="range" value={dimenstions.height}
-			onChange={e => setDimenstions(prev => ({
-				...prev,
-				height: Number(e.target.value)
-			}))}
-			max={1100} />
-		<input type="range" value={dimenstions.width}
-			onChange={e => setDimenstions(prev => ({
-				...prev,
-				width: Number(e.target.value)
-			}))}
-			max={1100} />
 	</div>
 	)
 }
