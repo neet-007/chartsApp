@@ -1,70 +1,10 @@
-import { ComponentProps, FC, useState } from "react";
+import { ComponentProps, FC } from "react";
+import { useDataContext } from "../../context/DataContext";
 
-const HEADERS = [
-	"header1",
-	"header2",
-	"header3",
-	"header4",
-];
-const SIDE_HEADERS = [
-	"side_header1",
-	"side_header2",
-	"side_header3",
-	"side_header4",
-];
 
 export const Spreadsheet: FC<ComponentProps<"div">> = () => {
-	const [headers, setHeaders] = useState<string[]>(
-		Array.from({ length: 5 }).map(() => HEADERS[Math.floor(Math.random() * HEADERS.length)])
-	);
-	const [sideHeaders, setSideHeaders] = useState<string[]>(
-		Array.from({ length: 10 }).map(() => SIDE_HEADERS[Math.floor(Math.random() * SIDE_HEADERS.length)])
-	);
-	const [data, setData] = useState<(number)[][]>(
-		Array.from({ length: 10 })
-			.map(() => Array.from({ length: 5 })
-				.map(() => Math.floor(Math.random() * 10)))
-
-	);
-
-	function onCellChange(row: number, col: number, v: string) {
-		if (data[row][col] === Number(v)) {
-			return
-		}
-
-		setData(prev => {
-			const newData = [...prev];
-			newData[row][col] = Number(v);
-
-			return newData
-		})
-	}
-
-	function onHeaderChange(cell: number, v: string) {
-		if (headers[cell] === v) {
-			return
-		}
-
-		setHeaders(prev => {
-			const newData = [...prev];
-			newData[cell] = v;
-
-			return newData
-		})
-	}
-
-	function onSideHeaderChange(cell: number, v: string) {
-		if (sideHeaders[cell] === v) {
-			return
-		}
-
-		setSideHeaders(prev => {
-			const newData = [...prev];
-			newData[cell] = v;
-
-			return newData
-		})
-	}
+	const { headers, sideHeaders, data, onCellChange,
+		onHeaderChange, onSideHeaderChange } = useDataContext();
 
 	return (
 		<table className="flex flex-col border-1 border-black border-collapse">
@@ -86,15 +26,14 @@ export const Spreadsheet: FC<ComponentProps<"div">> = () => {
 								style={{
 									position: "relative",
 								}}>
-								<div onClick={() => alert('hh')}
-									style={{
-										position: "absolute",
-										bottom: 0,
-										right: 0,
-										width: "6px",
-										height: "6px",
-										cursor: "crosshair"
-									}}
+								<div style={{
+									position: "absolute",
+									bottom: 0,
+									right: 0,
+									width: "6px",
+									height: "6px",
+									cursor: "crosshair"
+								}}
 								>
 								</div>
 								<input type="text"
@@ -131,15 +70,14 @@ export const Spreadsheet: FC<ComponentProps<"div">> = () => {
 								}}
 							>
 
-								<div onClick={() => alert('hh')}
-									style={{
-										position: "absolute",
-										bottom: 0,
-										right: 0,
-										width: "6px",
-										height: "6px",
-										cursor: "crosshair"
-									}}
+								<div style={{
+									position: "absolute",
+									bottom: 0,
+									right: 0,
+									width: "6px",
+									height: "6px",
+									cursor: "crosshair"
+								}}
 								>
 								</div>
 								<input type="text" defaultValue={sideHeaders[i]}
@@ -163,15 +101,14 @@ export const Spreadsheet: FC<ComponentProps<"div">> = () => {
 										style={{
 											position: "relative"
 										}}>
-										<div onClick={() => alert('hh')}
-											style={{
-												position: "absolute",
-												bottom: 0,
-												right: 0,
-												width: "6px",
-												height: "6px",
-												cursor: "crosshair"
-											}}
+										<div style={{
+											position: "absolute",
+											bottom: 0,
+											right: 0,
+											width: "6px",
+											height: "6px",
+											cursor: "crosshair"
+										}}
 										>
 										</div>
 										<input type="text" defaultValue={y}
