@@ -2,7 +2,7 @@ import { FC, ComponentProps, useState, useContext, createContext } from "react";
 
 type DataContextType = {
   headers: string[];
-  sideHeaders: string[];
+  sideHeaders: { header: string, color: string }[];
   data: number[][];
   onCellChange: (row: number, col: number, v: string) => void;
   onHeaderChange: (cell: number, v: string) => void;
@@ -37,8 +37,11 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
   const [headers, setHeaders] = useState<string[]>(
     Array.from({ length: 5 }).map(() => HEADERS[Math.floor(Math.random() * HEADERS.length)])
   );
-  const [sideHeaders, setSideHeaders] = useState<string[]>(
-    Array.from({ length: 10 }).map(() => SIDE_HEADERS[Math.floor(Math.random() * SIDE_HEADERS.length)])
+  const [sideHeaders, setSideHeaders] = useState<{ header: string, color: string }[]>(
+    Array.from({ length: 10 }).map((_, i) => ({
+      header: SIDE_HEADERS[Math.floor(Math.random() * SIDE_HEADERS.length)],
+      color: `hsl(${(i * 360 / 5)}, 100%, 50%)`,
+    }))
   );
   const [data, setData] = useState<(number)[][]>(
     Array.from({ length: 10 })
@@ -74,13 +77,13 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
   }
 
   function onSideHeaderChange(cell: number, v: string) {
-    if (sideHeaders[cell] === v) {
+    if (sideHeaders[cell].header === v) {
       return
     }
 
     setSideHeaders(prev => {
       const newData = [...prev];
-      newData[cell] = v;
+      newData[cell].header = v;
 
       return newData
     })

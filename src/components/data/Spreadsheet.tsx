@@ -80,7 +80,7 @@ export const Spreadsheet: FC<ComponentProps<"div">> = () => {
 								}}
 								>
 								</div>
-								<input type="text" defaultValue={sideHeaders[i]}
+								<input type="text" defaultValue={sideHeaders[i].header}
 									className={`w-full
 										outline-none
 										hover:outline-blue-400

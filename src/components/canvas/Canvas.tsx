@@ -55,19 +55,19 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		canvasCtx.stroke(sideLine);
 		canvasCtx.stroke(bottomLine);
 
-		for (let i = 0; i < data[0].length; i++) {
+		for (let i = 0; i < data.length; i++) {
 			const line = new Path2D();
 			line.moveTo(
 				xOffset,
-				height - yOffset - (data[0][i] / maxVal) * (height - yOffset)
+				height - yOffset - (data[i][0] / maxVal) * (height - yOffset)
 			);
-			for (let j = 1; j < data.length; j++) {
+			for (let j = 1; j < data[i].length; j++) {
 				line.lineTo(
 					xOffset + j * multX,
-					height - yOffset - (data[j][i] / maxVal) * (height - yOffset)
+					height - yOffset - (data[i][j] / maxVal) * (height - yOffset)
 				);
 			}
-			canvasCtx.strokeStyle = `hsl(${(i * 360 / data.length)}, 100%, 50%)`;
+			canvasCtx.strokeStyle = sideHeaders[i].color;
 			canvasCtx.stroke(line);
 		}
 
