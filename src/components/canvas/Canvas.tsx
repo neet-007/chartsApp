@@ -2,6 +2,14 @@ import { ComponentProps, FC, useEffect, useRef } from "react";
 import { useDataContext } from "../../context/DataContext";
 import { useCanvasContext } from "../../context/CanvasContext";
 
+function generateSteps(minVal: number, maxVal: number, cap: number) {
+	const range = maxVal - minVal;
+
+	const numSteps = Math.min(cap, range);
+
+	return Math.ceil(range / numSteps);
+}
+
 export const Canvas: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data } = useDataContext();
 	const { dimenstions, title, subTitle } = useCanvasContext();
@@ -70,16 +78,23 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		const xOffset = 50;
 		const fontSize = 16;
 
-
-		const multY = (height - 2 * yOffset) / 10;
-		const multX = (width - 2 * xOffset) / (headers.length);
-
 		const maxVal = Math.floor(
 			data.flat().reduce(
 				(acc, val) => Math.max(acc, val),
 				0
 			)
 		);
+
+		const minVal = Math.floor(
+			data.flat().reduce(
+				(acc, val) => Math.min(acc, val),
+				data[0][0]
+			)
+		);
+
+		const numberOfSteps = generateSteps(minVal, maxVal, 20)
+		const multY = (height - 2 * yOffset) / ((maxVal - minVal) / numberOfSteps);
+		const multX = (width - 2 * xOffset) / (headers.length);
 
 		canvasCtx.clearRect(0, 0, width, height);
 
@@ -97,8 +112,16 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		canvasCtx.fillStyle = "black";
 		let yLabelValue = maxVal;
 		for (let y = yOffset; y <= height - yOffset; y += multY) {
-			canvasCtx.fillText(`${yLabelValue}`, xOffset - 40, y + (fontSize / 2));
-			yLabelValue = Math.floor(yLabelValue - maxVal / 10);
+			if (yLabelValue === 0) {
+				yLabelValue = Math.floor(yLabelValue - numberOfSteps);
+				continue
+			}
+			const metrics = canvasCtx.measureText(`${yLabelValue}`);
+			const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+
+			canvasCtx.fillText(`${yLabelValue}`, xOffset - 40, y +
+				(textHeight / 2));
+			yLabelValue = Math.floor(yLabelValue - numberOfSteps);
 		}
 
 		for (let i = 0; i < headers.length; i++) {
