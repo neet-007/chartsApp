@@ -4,8 +4,55 @@ import { useCanvasContext } from "../../context/CanvasContext";
 
 export const Canvas: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data } = useDataContext();
-	const { dimenstions } = useCanvasContext();
+	const { dimenstions, title, subTitle } = useCanvasContext();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const prevTitleRef = useRef(title);
+	const prevSubTitleRef = useRef(subTitle);
+
+	useEffect(() => {
+		if (!canvasRef.current) {
+			return;
+		}
+
+		const canvasCtx = canvasRef.current.getContext("2d", { willReadFrequently: true });
+		if (!canvasCtx) {
+			return;
+		}
+
+		const fontSize = 16;
+		const width = canvasRef.current.width;
+
+		const prevTitle = prevTitleRef.current;
+		const prevSubTitle = prevSubTitleRef.current;
+
+		canvasCtx.fillStyle = "black";
+		if (prevTitle !== title) {
+			canvasCtx.clearRect(
+				0,
+				0,
+				width,
+				fontSize * 1.5 + 5
+			);
+			canvasCtx.font = `${fontSize * 1.5}px Arial`;
+			canvasCtx.fillText(title, (width / 2) - (canvasCtx.measureText(title).width / 2), fontSize * 1.5);
+		}
+
+		if (prevSubTitle !== subTitle) {
+			canvasCtx.clearRect(
+				0,
+				fontSize * 1.5 + 5,
+				width,
+				fontSize * 1.2 + 5
+			);
+
+			canvasCtx.font = `${fontSize * 1.2}px Arial`;
+			canvasCtx.fillText(subTitle, (width / 2) - (canvasCtx.measureText(subTitle).width / 2), (fontSize * 1.5) + fontSize * 1.2 + 5);
+		}
+
+		prevTitleRef.current = title;
+		prevSubTitleRef.current = subTitle;
+
+	}, [title, subTitle]);
 
 	useEffect(() => {
 		if (!canvasRef.current) {
@@ -39,11 +86,11 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		canvasCtx.font = `${fontSize * 1.5}px Arial`;
 		canvasCtx.fillStyle = "black";
 
-		canvasCtx.fillText("tilte", (width / 2) -
-			(canvasCtx.measureText("title").width / 2), fontSize * 1.5);
+		canvasCtx.fillText(title, (width / 2) -
+			(canvasCtx.measureText(title).width / 2), fontSize * 1.5);
 		canvasCtx.font = `${fontSize * 1.2}px Arial`;
-		canvasCtx.fillText("sub tilte", (width / 2) -
-			(canvasCtx.measureText("sub title").width / 2), (fontSize * 1.2) +
+		canvasCtx.fillText(subTitle, (width / 2) -
+			(canvasCtx.measureText(subTitle).width / 2), (fontSize * 1.2) +
 			(fontSize * 1.5) + 5);
 
 		canvasCtx.font = `${fontSize}px Arial`;
@@ -105,16 +152,12 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		for (let i = 0; i < sideHeaders.length; i++) {
 			accWidth += (canvasCtx.measureText(sideHeaders[i].header).width + 24);
 			if (accWidth >= width) {
-				console.log("adjus hieght")
 				accWidth = 0;
 				textHeight += 80;
 			}
 		}
 
-		console.log(height - yOffset)
-		console.log(textHeight)
 		if (height - yOffset < textHeight) {
-			console.log("need new heigth")
 			const image = canvasCtx.getImageData(0, 0, width, height);
 			canvasRef.current.height += textHeight - (height - yOffset);
 			canvasCtx.font = `${fontSize}px Arial`;

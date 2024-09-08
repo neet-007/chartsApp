@@ -5,11 +5,19 @@ type DimenstionsType = { height: number, width: number }
 type CanvasContextType = {
   dimenstions: DimenstionsType,
   setDimenstions: React.Dispatch<React.SetStateAction<DimenstionsType>>
+  title: string,
+  setTitle: React.Dispatch<React.SetStateAction<string>>
+  subTitle: string,
+  setSubTitle: React.Dispatch<React.SetStateAction<string>>
 }
 
 const INITIAL_STATE: CanvasContextType = {
   dimenstions: { height: 0, width: 0 },
   setDimenstions: () => { },
+  title: "title",
+  setTitle: () => { },
+  subTitle: "sub title",
+  setSubTitle: () => { },
 };
 
 const canvasContext = createContext<CanvasContextType>(INITIAL_STATE);
@@ -19,10 +27,16 @@ export const CanvasContextProvider: FC<ComponentProps<"div">> = ({ children }) =
     height: 300,
     width: 500,
   })
+  const [title, setTitle] = useState<string>("title");
+  const [subTitle, setSubTitle] = useState<string>("sub title");
 
   const value = {
     dimenstions,
-    setDimenstions
+    setDimenstions,
+    title,
+    subTitle,
+    setTitle,
+    setSubTitle,
   } as CanvasContextType
 
   return (
