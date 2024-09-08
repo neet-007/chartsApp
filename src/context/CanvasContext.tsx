@@ -24,8 +24,8 @@ const canvasContext = createContext<CanvasContextType>(INITIAL_STATE);
 
 export const CanvasContextProvider: FC<ComponentProps<"div">> = ({ children }) => {
   const [dimenstions, setDimenstions] = useState<DimenstionsType>({
-    height: 300,
-    width: 500,
+    height: 500,
+    width: 800,
   })
   const [title, setTitle] = useState<string>("title");
   const [subTitle, setSubTitle] = useState<string>("sub title");

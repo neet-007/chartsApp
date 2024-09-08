@@ -207,7 +207,10 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 			}
 		}
 
+		console.log(height - yOffset)
+		console.log(textHeight)
 		if (height - yOffset < textHeight) {
+			console.log("bigger")
 			const image = canvasCtx.getImageData(0, 0, width, height);
 			canvasRef.current.height += textHeight - (height - yOffset);
 			canvasCtx.font = `${fontSize}px Arial`;
@@ -217,14 +220,15 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		accWidth = 0;
 		for (let i = 0; i < sideHeaders.length; i++) {
 			canvasCtx.fillStyle = sideHeaders[i].color;
-			canvasCtx.fillRect(xOffset + accWidth, height - 20, 10, 10);
+			canvasCtx.fillRect(xOffset + accWidth, height - yOffset + 40, 10, 10);
 
 			canvasCtx.fillStyle = "#000000";
-			canvasCtx.fillText(sideHeaders[i].header, xOffset + 14 + accWidth, height - 10);
+			canvasCtx.fillText(sideHeaders[i].header, xOffset + 14 + accWidth,
+				height - yOffset + 50);
 			accWidth += (canvasCtx.measureText(sideHeaders[i].header).width + 24);
-			if (accWidth >= width) {
+			if (accWidth + canvasCtx.measureText(sideHeaders[i].header).width * 1.5 >= width) {
 				accWidth = 0;
-				height += 50;
+				height += 30;
 			}
 		}
 
