@@ -125,7 +125,15 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		}
 
 		for (let i = 0; i < headers.length; i++) {
-			canvasCtx.fillText(headers[i], xOffset + i * multX, height - yOffset + 20);
+			if (i === 0) {
+				canvasCtx.fillText(headers[i],
+					xOffset + i * multX,
+					height - yOffset + 20);
+				continue
+			}
+			canvasCtx.fillText(headers[i],
+				xOffset + i * multX - canvasCtx.measureText(headers[i]).width / 2,
+				height - yOffset + 20);
 		}
 
 		const sideLine = new Path2D();
@@ -207,10 +215,7 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 			}
 		}
 
-		console.log(height - yOffset)
-		console.log(textHeight)
 		if (height - yOffset < textHeight) {
-			console.log("bigger")
 			const image = canvasCtx.getImageData(0, 0, width, height);
 			canvasRef.current.height += textHeight - (height - yOffset);
 			canvasCtx.font = `${fontSize}px Arial`;
