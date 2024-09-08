@@ -1,4 +1,4 @@
-import { ComponentProps, FC, useEffect, useRef, useState } from "react";
+import { ComponentProps, FC, useEffect, useRef } from "react";
 import { useDataContext } from "../../context/DataContext";
 import { useCanvasContext } from "../../context/CanvasContext";
 
@@ -12,16 +12,17 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 			return;
 		}
 
-		const canvasCtx = canvasRef.current.getContext("2d");
+		const canvasCtx = canvasRef.current.getContext("2d", { willReadFrequently: true });
 		if (!canvasCtx) {
 			return;
 		}
 
-		const height = canvasRef.current.height;
+		let height = canvasRef.current.height;
 		const width = canvasRef.current.width;
 		const yOffset = 100;
 		const xOffset = 50;
 		const fontSize = 16;
+
 
 		const multY = (height - 2 * yOffset) / 10;
 		const multX = (width - 2 * xOffset) / (headers.length);
@@ -34,6 +35,16 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		);
 
 		canvasCtx.clearRect(0, 0, width, height);
+
+		canvasCtx.font = `${fontSize * 1.5}px Arial`;
+		canvasCtx.fillStyle = "black";
+
+		canvasCtx.fillText("tilte", (width / 2) -
+			(canvasCtx.measureText("title").width / 2), fontSize * 1.5);
+		canvasCtx.font = `${fontSize * 1.2}px Arial`;
+		canvasCtx.fillText("sub tilte", (width / 2) -
+			(canvasCtx.measureText("sub title").width / 2), (fontSize * 1.2) +
+			(fontSize * 1.5) + 5);
 
 		canvasCtx.font = `${fontSize}px Arial`;
 		canvasCtx.fillStyle = "black";
@@ -89,15 +100,41 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		canvasCtx.shadowOffsetX = 0;
 		canvasCtx.shadowOffsetY = 0;
 
+		let accWidth = 0;
+		let textHeight = 50;
+		for (let i = 0; i < sideHeaders.length; i++) {
+			accWidth += (canvasCtx.measureText(sideHeaders[i].header).width + 24);
+			if (accWidth >= width) {
+				console.log("adjus hieght")
+				accWidth = 0;
+				textHeight += 80;
+			}
+		}
 
-		const legendMultX = (width - 2 * xOffset) / (sideHeaders.length);
+		console.log(height - yOffset)
+		console.log(textHeight)
+		if (height - yOffset < textHeight) {
+			console.log("need new heigth")
+			const image = canvasCtx.getImageData(0, 0, width, height);
+			canvasRef.current.height += textHeight - (height - yOffset);
+			canvasCtx.font = `${fontSize}px Arial`;
+			canvasCtx.putImageData(image, 0, 0)
+		}
+
+		accWidth = 0;
 		for (let i = 0; i < sideHeaders.length; i++) {
 			canvasCtx.fillStyle = sideHeaders[i].color;
-			canvasCtx.fillRect(xOffset + i * legendMultX, height - 20, 10, 10);
+			canvasCtx.fillRect(xOffset + accWidth, height - 20, 10, 10);
 
 			canvasCtx.fillStyle = "#000000";
-			canvasCtx.fillText(sideHeaders[i].header, xOffset + 14 + i * legendMultX, height - 10);
+			canvasCtx.fillText(sideHeaders[i].header, xOffset + 14 + accWidth, height - 10);
+			accWidth += (canvasCtx.measureText(sideHeaders[i].header).width + 24);
+			if (accWidth >= width) {
+				accWidth = 0;
+				height += 50;
+			}
 		}
+
 
 		return () => {
 			canvasCtx.clearRect(0, 0, width, height);
@@ -112,7 +149,7 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 	}, [canvasRef, data, headers, dimenstions.height, dimenstions.width]);
 
 	return (<div>
-		<canvas width={dimenstions.width} height={dimenstions.height}
+		<canvas className="bg-gray-400" width={dimenstions.width} height={dimenstions.height}
 			ref={canvasRef}
 		>
 		</canvas>

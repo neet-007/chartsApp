@@ -5,7 +5,7 @@ export const CanvasControl: FC<ComponentProps<"div">> = () => {
 	const { dimenstions, setDimenstions } = useCanvasContext()
 
 	return (
-		<div className="absolute right-0">
+		<div className="fixed right-0 top-0">
 			<input type="range" value={dimenstions.height}
 				onChange={e => setDimenstions(prev => ({
 					...prev,
