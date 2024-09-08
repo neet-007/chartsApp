@@ -119,7 +119,7 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 			const metrics = canvasCtx.measureText(`${yLabelValue}`);
 			const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
 
-			canvasCtx.fillText(`${yLabelValue}`, xOffset - 40, y +
+			canvasCtx.fillText(`${yLabelValue}`, xOffset - 20, y +
 				(textHeight / 2));
 			yLabelValue = Math.floor(yLabelValue - numberOfSteps);
 		}
@@ -146,12 +146,38 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 				xOffset,
 				yOffset + (1 - data[i][0] / maxVal) * (height - 2 * yOffset)
 			);
+			const metrics = canvasCtx.measureText(`${data[i][0]}`);
+			const textHeight = (metrics.fontBoundingBoxAscent
+				+ metrics.fontBoundingBoxDescent);
+
+			canvasCtx.font = `${fontSize}px Arial`;
+			canvasCtx.fillStyle = "black";
+			canvasCtx.globalCompositeOperation = 'destination-over';
+			canvasCtx.fillText(data[i][0].toString(),
+				xOffset,
+				yOffset + (1 - data[i][0] / maxVal) * (height - 2 * yOffset) - textHeight / 2
+			);
+
 			for (let j = 1; j < data[i].length; j++) {
+				const metrics = canvasCtx.measureText(`${data[i][j]}`);
+				const textHeight = (metrics.fontBoundingBoxAscent
+					+ metrics.fontBoundingBoxDescent);
+
 				line.lineTo(
 					xOffset + j * multX,
 					yOffset + (1 - data[i][j] / maxVal) * (height - 2 * yOffset)
 				);
+
+				canvasCtx.font = `${fontSize}px Arial`;
+				canvasCtx.fillStyle = "black";
+				canvasCtx.globalCompositeOperation = 'destination-over';
+				canvasCtx.fillText(data[i][j].toString(),
+					xOffset + j * multX,
+					yOffset + (1 - data[i][j] / maxVal) * (height - 2 * yOffset - textHeight / 2)
+				);
+
 			}
+			canvasCtx.globalCompositeOperation = 'source-over';
 			canvasCtx.strokeStyle = sideHeaders[i].color;
 			canvasCtx.lineWidth = 2;
 			canvasCtx.lineJoin = "round";
@@ -169,6 +195,7 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		canvasCtx.shadowBlur = 0;
 		canvasCtx.shadowOffsetX = 0;
 		canvasCtx.shadowOffsetY = 0;
+		canvasCtx.font = `${fontSize}px Arial`;
 
 		let accWidth = 0;
 		let textHeight = 50;
@@ -212,7 +239,7 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 			canvasCtx.shadowOffsetX = 0;
 			canvasCtx.shadowOffsetY = 0;
 		}
-	}, [canvasRef, data, headers, dimenstions.height, dimenstions.width]);
+	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width]);
 
 	return (<div>
 		<canvas className="bg-gray-400" width={dimenstions.width} height={dimenstions.height}
