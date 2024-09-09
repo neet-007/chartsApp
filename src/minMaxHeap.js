@@ -210,6 +210,48 @@ var MinMaxHeap = /** @class */ (function () {
             }
         }
     };
+    MinMaxHeap.prototype.bulkInsert = function (values) {
+        for (var i = 0; i < values.length; i++) {
+            this.heap.push(values[i]);
+            if (this.heapMap.has(values[i])) {
+                this.heapMap.get(values[i]).push(this.heap.length - 1);
+            }
+            else {
+                this.heapMap.set(values[i], [this.heap.length - 1]);
+            }
+        }
+        for (var i = Math.floor(this.heap.length / 2) - 1; i > -1; i--) {
+            this.pushDownIter(i);
+        }
+    };
+    MinMaxHeap.prototype.bulkDeleteDifferent = function (values) {
+        var indicesToRemove = [];
+        for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
+            var value = values_1[_i];
+            var indices = this.heapMap.get(value);
+            if (indices) {
+                indicesToRemove.push.apply(indicesToRemove, indices);
+                this.heapMap.delete(value);
+            }
+        }
+        indicesToRemove.sort(function (a, b) { return b - a; });
+        for (var _a = 0, indicesToRemove_1 = indicesToRemove; _a < indicesToRemove_1.length; _a++) {
+            var index = indicesToRemove_1[_a];
+            if (index === this.heap.length - 1) {
+                this.heap.pop();
+            }
+            else {
+                var lastElement = this.heap.pop();
+                this.heap[index] = lastElement;
+                var lastElementIndices = this.heapMap.get(lastElement);
+                lastElementIndices.pop();
+                lastElementIndices.push(index);
+            }
+        }
+        for (var i = Math.floor(this.heap.length / 2) - 1; i >= 0; i--) {
+            this.pushDownIter(i);
+        }
+    };
     MinMaxHeap.prototype.buildHeap = function (array) {
         this.heap = array.slice();
         for (var i = 0; i < this.heap.length; i++) {
@@ -232,9 +274,9 @@ var heap = new MinMaxHeap();
 heap.buildHeap(arr);
 console.log(heap.heap);
 console.log(heap.heapMap);
-var update = heap.heap[Math.floor((heap.heap.length - 1) * Math.random())];
-console.log("delete", update);
-heap.delete(update);
+var newValues = heap.heap.filter(function (_, i) { return i % 2 === 0; });
+console.log("delete values", newValues.join(","));
+heap.bulkDeleteDifferent(newValues);
 console.log(heap.heap);
 console.log(heap.heapMap);
 /*

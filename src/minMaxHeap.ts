@@ -222,6 +222,53 @@ class MinMaxHeap {
     }
   }
 
+  public bulkInsert(values: number[]) {
+    for (let i = 0; i < values.length; i++) {
+      this.heap.push(values[i]);
+      if (this.heapMap.has(values[i])) {
+        this.heapMap.get(values[i])!.push(this.heap.length - 1);
+      } else {
+        this.heapMap.set(values[i], [this.heap.length - 1]);
+      }
+    }
+
+    for (let i = Math.floor(this.heap.length / 2) - 1; i > -1; i--) {
+      this.pushDownIter(i);
+    }
+
+  }
+
+  public bulkDeleteDifferent(values: number[]): void {
+    const indicesToRemove: number[] = [];
+
+    for (const value of values) {
+      const indices = this.heapMap.get(value);
+      if (indices) {
+        indicesToRemove.push(...indices);
+        this.heapMap.delete(value);
+      }
+    }
+
+    indicesToRemove.sort((a, b) => b - a);
+
+    for (const index of indicesToRemove) {
+      if (index === this.heap.length - 1) {
+        this.heap.pop();
+      } else {
+        const lastElement = this.heap.pop()!;
+        this.heap[index] = lastElement;
+
+        const lastElementIndices = this.heapMap.get(lastElement)!;
+        lastElementIndices.pop();
+        lastElementIndices.push(index);
+      }
+    }
+
+    for (let i = Math.floor(this.heap.length / 2) - 1; i >= 0; i--) {
+      this.pushDownIter(i);
+    }
+  }
+
   public buildHeap(array: number[]): void {
     this.heap = array.slice();
 
@@ -245,10 +292,10 @@ const heap = new MinMaxHeap();
 heap.buildHeap(arr);
 console.log(heap.heap);
 console.log(heap.heapMap);
-const update = heap.heap[Math.floor((heap.heap.length - 1) * Math.random())];
-console.log("delete", update);
-heap.delete(update);
-console.log(heap.heap);
+const newValues = heap.heap.filter((_, i) => i % 2 === 0);
+console.log("delete values", newValues.join(","));
+heap.bulkDeleteDifferent(newValues);
+console.log(heap.heap)
 console.log(heap.heapMap);
 
 /*
