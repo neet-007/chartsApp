@@ -161,12 +161,15 @@ class MinMaxHeap {
     return max;
   }
 
-  public update(oldValue: number, newValue: number): void {
+  public update(oldValue: number, newValue: number, count: number): void {
     const indices = this.heapMap.get(oldValue);
 
     if (!indices || indices.length === 0) return;
 
     for (const index of indices) {
+      if (count <= 0) {
+        break
+      }
       this.heap[index] = newValue;
 
       let list = this.heapMap.get(oldValue)!;
@@ -188,15 +191,16 @@ class MinMaxHeap {
       } else {
         this.pushDownIter(index);
       }
+      count--;
     }
   }
 
-  public delete(value: number): void {
+  public delete(value: number, count: number): void {
     const indices = this.heapMap.get(value);
 
     if (!indices || indices.length === 0) return;
 
-    while (indices.length > 0) {
+    while (indices.length > 0 && count > 0) {
       const index = indices.pop()!;
 
       if (index === this.heap.length - 1) {
@@ -219,6 +223,7 @@ class MinMaxHeap {
       if (indices.length === 0) {
         this.heapMap.delete(value);
       }
+      count--;
     }
   }
 
@@ -238,14 +243,22 @@ class MinMaxHeap {
 
   }
 
-  public bulkDeleteDifferent(values: number[]): void {
+  public bulkDelete(values: [number, number][]): void {
     const indicesToRemove: number[] = [];
 
     for (const value of values) {
-      const indices = this.heapMap.get(value);
+      const indices = this.heapMap.get(value[0]);
       if (indices) {
-        indicesToRemove.push(...indices);
-        this.heapMap.delete(value);
+        indices.sort((a, b) => b - a);
+        indicesToRemove.push(...[...indices].splice(0, value[1]));
+
+        if (indices.length > value[1]) {
+          for (let j = 0; j < value[1]; j++) {
+            indices.pop();
+          }
+        } else {
+          this.heapMap.delete(value[0]);
+        }
       }
     }
 
@@ -261,6 +274,28 @@ class MinMaxHeap {
         const lastElementIndices = this.heapMap.get(lastElement)!;
         lastElementIndices.pop();
         lastElementIndices.push(index);
+      }
+    }
+
+    for (let i = Math.floor(this.heap.length / 2) - 1; i >= 0; i--) {
+      this.pushDownIter(i);
+    }
+  }
+
+  public bulkUpdate(oldValues: number[], newValues: number[]): void {
+    for (let i = 0; i < oldValues.length; i++) {
+      const indices = this.heapMap.get(oldValues[i]);
+      if (indices) {
+        for (let j = 0; j < indices.length; j++) {
+          this.heap[indices[j]] = newValues[i];
+        }
+        this.heapMap.delete(oldValues[i]);
+        const newVal = this.heapMap.get(newValues[i]);
+        if (!newVal) {
+          this.heapMap.set(newValues[i], indices);
+        } else {
+          this.heapMap.set(newValues[i], newVal.concat(indices))
+        }
       }
     }
 
@@ -287,14 +322,17 @@ class MinMaxHeap {
   }
 }
 
-const arr = Array.from({ length: 20 }).map(() => Math.floor(Math.random() * 100));
+let arr = Array.from({ length: 20 }).map(() => Math.floor(Math.random() * 100));
+arr = arr.filter(x => x !== 4);
+arr.push(4);
+arr.push(4)
 const heap = new MinMaxHeap();
 heap.buildHeap(arr);
 console.log(heap.heap);
 console.log(heap.heapMap);
-const newValues = heap.heap.filter((_, i) => i % 2 === 0);
-console.log("delete values", newValues.join(","));
-heap.bulkDeleteDifferent(newValues);
+const deleteVals = arr.filter((_, i) => i % 5 === 0).map(x => x === 4 ? [x, 0] as [number, number] : [x, 0] as [number, number]);
+console.log("delete, count: ", deleteVals.join(" "));
+heap.bulkDelete(deleteVals);
 console.log(heap.heap)
 console.log(heap.heapMap);
 
