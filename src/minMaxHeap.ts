@@ -161,6 +161,67 @@ class MinMaxHeap {
     return max;
   }
 
+  public update(oldValue: number, newValue: number): void {
+    const indices = this.heapMap.get(oldValue);
+
+    if (!indices || indices.length === 0) return;
+
+    for (const index of indices) {
+      this.heap[index] = newValue;
+
+      let list = this.heapMap.get(oldValue)!;
+      list = list.filter(i => i !== index);
+      if (list.length === 0) {
+        this.heapMap.delete(oldValue);
+      } else {
+        this.heapMap.set(oldValue, list);
+      }
+
+      if (this.heapMap.has(newValue)) {
+        this.heapMap.get(newValue)!.push(index);
+      } else {
+        this.heapMap.set(newValue, [index]);
+      }
+
+      if (index > 0 && this.heap[index] < this.heap[this.grandparent(index)]) {
+        this.pushUpIter(index);
+      } else {
+        this.pushDownIter(index);
+      }
+    }
+  }
+
+  public delete(value: number): void {
+    const indices = this.heapMap.get(value);
+
+    if (!indices || indices.length === 0) return;
+
+    while (indices.length > 0) {
+      const index = indices.pop()!;
+
+      if (index === this.heap.length - 1) {
+        this.heap.pop();
+      } else {
+        const lastElement = this.heap.pop()!;
+        this.heap[index] = lastElement;
+
+        const lastElementIndices = this.heapMap.get(lastElement)!;
+        lastElementIndices.pop();
+        lastElementIndices.push(index);
+
+        if (index > 0 && this.heap[index] < this.heap[this.parent(index)]) {
+          this.pushUpIter(index);
+        } else {
+          this.pushDownIter(index);
+        }
+      }
+
+      if (indices.length === 0) {
+        this.heapMap.delete(value);
+      }
+    }
+  }
+
   public buildHeap(array: number[]): void {
     this.heap = array.slice();
 
@@ -179,11 +240,16 @@ class MinMaxHeap {
   }
 }
 
-const arr = Array.from({ length: 10 }).map(() => Math.floor(Math.random() * 100));
+const arr = Array.from({ length: 20 }).map(() => Math.floor(Math.random() * 100));
 const heap = new MinMaxHeap();
 heap.buildHeap(arr);
 console.log(heap.heap);
-console.log(heap.heapMap)
+console.log(heap.heapMap);
+const update = heap.heap[Math.floor((heap.heap.length - 1) * Math.random())];
+console.log("delete", update);
+heap.delete(update);
+console.log(heap.heap);
+console.log(heap.heapMap);
 
 /*
 for (let k = 0; k < 10; k++) {

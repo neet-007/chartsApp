@@ -123,14 +123,11 @@ var MinMaxHeap = /** @class */ (function () {
     };
     MinMaxHeap.prototype.swap = function (i, j) {
         var _a;
-        // Directly update indices in the heapMap without filtering
         var listI = this.heapMap.get(this.heap[i]);
         var listJ = this.heapMap.get(this.heap[j]);
         listI[listI.indexOf(i)] = j;
         listJ[listJ.indexOf(j)] = i;
-        // Perform the swap in the heap
         _a = [this.heap[j], this.heap[i]], this.heap[i] = _a[0], this.heap[j] = _a[1];
-        // No need to set lists back into the map since we directly modified them
     };
     MinMaxHeap.prototype.insert = function (value) {
         this.heap.push(value);
@@ -153,6 +150,66 @@ var MinMaxHeap = /** @class */ (function () {
         this.pushDownIter(maxIndex);
         return max;
     };
+    MinMaxHeap.prototype.update = function (oldValue, newValue) {
+        var indices = this.heapMap.get(oldValue);
+        if (!indices || indices.length === 0)
+            return;
+        var _loop_1 = function (index) {
+            this_1.heap[index] = newValue;
+            var list = this_1.heapMap.get(oldValue);
+            list = list.filter(function (i) { return i !== index; });
+            if (list.length === 0) {
+                this_1.heapMap.delete(oldValue);
+            }
+            else {
+                this_1.heapMap.set(oldValue, list);
+            }
+            if (this_1.heapMap.has(newValue)) {
+                this_1.heapMap.get(newValue).push(index);
+            }
+            else {
+                this_1.heapMap.set(newValue, [index]);
+            }
+            if (index > 0 && this_1.heap[index] < this_1.heap[this_1.grandparent(index)]) {
+                this_1.pushUpIter(index);
+            }
+            else {
+                this_1.pushDownIter(index);
+            }
+        };
+        var this_1 = this;
+        for (var _i = 0, indices_1 = indices; _i < indices_1.length; _i++) {
+            var index = indices_1[_i];
+            _loop_1(index);
+        }
+    };
+    MinMaxHeap.prototype.delete = function (value) {
+        var indices = this.heapMap.get(value);
+        if (!indices || indices.length === 0)
+            return;
+        while (indices.length > 0) {
+            var index = indices.pop();
+            if (index === this.heap.length - 1) {
+                this.heap.pop();
+            }
+            else {
+                var lastElement = this.heap.pop();
+                this.heap[index] = lastElement;
+                var lastElementIndices = this.heapMap.get(lastElement);
+                lastElementIndices.pop();
+                lastElementIndices.push(index);
+                if (index > 0 && this.heap[index] < this.heap[this.parent(index)]) {
+                    this.pushUpIter(index);
+                }
+                else {
+                    this.pushDownIter(index);
+                }
+            }
+            if (indices.length === 0) {
+                this.heapMap.delete(value);
+            }
+        }
+    };
     MinMaxHeap.prototype.buildHeap = function (array) {
         this.heap = array.slice();
         for (var i = 0; i < this.heap.length; i++) {
@@ -170,9 +227,14 @@ var MinMaxHeap = /** @class */ (function () {
     };
     return MinMaxHeap;
 }());
-var arr = Array.from({ length: 10 }).map(function () { return Math.floor(Math.random() * 100); });
+var arr = Array.from({ length: 20 }).map(function () { return Math.floor(Math.random() * 100); });
 var heap = new MinMaxHeap();
 heap.buildHeap(arr);
+console.log(heap.heap);
+console.log(heap.heapMap);
+var update = heap.heap[Math.floor((heap.heap.length - 1) * Math.random())];
+console.log("delete", update);
+heap.delete(update);
 console.log(heap.heap);
 console.log(heap.heapMap);
 /*
