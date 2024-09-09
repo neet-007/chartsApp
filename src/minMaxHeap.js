@@ -1,17 +1,9 @@
 // EVEN levels are min
 // ODD levels are max
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var MinMaxHeap = /** @class */ (function () {
     function MinMaxHeap() {
         this.heap = [];
+        this.heapMap = new Map();
     }
     MinMaxHeap.prototype.isMinLevel = function (index) {
         return Math.floor(Math.log2(index + 1)) % 2 === 0;
@@ -130,9 +122,15 @@ var MinMaxHeap = /** @class */ (function () {
         return Math.floor(Math.log2(targetIndex + 1)) === Math.floor(Math.log2(index + 1)) + 2;
     };
     MinMaxHeap.prototype.swap = function (i, j) {
-        var temp = this.heap[i];
-        this.heap[i] = this.heap[j];
-        this.heap[j] = temp;
+        var _a;
+        // Directly update indices in the heapMap without filtering
+        var listI = this.heapMap.get(this.heap[i]);
+        var listJ = this.heapMap.get(this.heap[j]);
+        listI[listI.indexOf(i)] = j;
+        listJ[listJ.indexOf(j)] = i;
+        // Perform the swap in the heap
+        _a = [this.heap[j], this.heap[i]], this.heap[i] = _a[0], this.heap[j] = _a[1];
+        // No need to set lists back into the map since we directly modified them
     };
     MinMaxHeap.prototype.insert = function (value) {
         this.heap.push(value);
@@ -157,46 +155,70 @@ var MinMaxHeap = /** @class */ (function () {
     };
     MinMaxHeap.prototype.buildHeap = function (array) {
         this.heap = array.slice();
+        for (var i = 0; i < this.heap.length; i++) {
+            var list = this.heapMap.get(this.heap[i]);
+            if (list) {
+                list.push(i);
+            }
+            else {
+                this.heapMap.set(this.heap[i], [i]);
+            }
+        }
         for (var i = Math.floor(this.heap.length / 2) - 1; i >= 0; i--) {
             this.pushDownIter(i);
         }
     };
     return MinMaxHeap;
 }());
-for (var k = 0; k < 10; k++) {
-    var arrLength = Math.floor(Math.random() * 15);
-    var arr = Array.from({ length: arrLength }).map(function () { return Math.floor(Math.random() * 100); });
-    var heap = new MinMaxHeap();
-    heap.buildHeap(__spreadArray([], arr, true));
-    if (heap.heap.length === 0) {
-        console.log("Heap is empty.");
-        continue;
+var arr = Array.from({ length: 10 }).map(function () { return Math.floor(Math.random() * 100); });
+var heap = new MinMaxHeap();
+heap.buildHeap(arr);
+console.log(heap.heap);
+console.log(heap.heapMap);
+/*
+for (let k = 0; k < 10; k++) {
+  const arrLength = Math.floor(Math.random() * 15);
+  const arr = Array.from({ length: arrLength }).map(() => Math.floor(Math.random() * 100));
+
+  const heap = new MinMaxHeap();
+  heap.buildHeap([...arr]);
+
+  if (heap.heap.length === 0) {
+    console.log("Heap is empty.");
+    continue;
+  }
+
+  const q = [0];
+  let toPrint = [];
+  let level = 0;
+  let nodesInLevel = Math.pow(2, level);
+
+  console.log("Array Length:", arrLength);
+  console.log("Heap:");
+
+  while (q.length) {
+    const currIndex = q.shift()!;
+    const currValue = heap.heap[currIndex];
+    toPrint.push(currValue);
+
+    const leftChild = 2 * currIndex + 1;
+    const rightChild = 2 * currIndex + 2;
+
+    if (leftChild < heap.heap.length) q.push(leftChild);
+    if (rightChild < heap.heap.length) q.push(rightChild);
+
+    if (toPrint.length === nodesInLevel) {
+      console.log(toPrint.join(" "));
+      toPrint = [];
+      level++;
+      nodesInLevel = Math.pow(2, level);
     }
-    var q = [0];
-    var toPrint = [];
-    var level = 0;
-    var nodesInLevel = Math.pow(2, level);
-    console.log("Array Length:", arrLength);
-    console.log("Heap:");
-    while (q.length) {
-        var currIndex = q.shift();
-        var currValue = heap.heap[currIndex];
-        toPrint.push(currValue);
-        var leftChild = 2 * currIndex + 1;
-        var rightChild = 2 * currIndex + 2;
-        if (leftChild < heap.heap.length)
-            q.push(leftChild);
-        if (rightChild < heap.heap.length)
-            q.push(rightChild);
-        if (toPrint.length === nodesInLevel) {
-            console.log(toPrint.join(" "));
-            toPrint = [];
-            level++;
-            nodesInLevel = Math.pow(2, level);
-        }
-    }
-    if (toPrint.length > 0) {
-        console.log(toPrint.join(" "));
-    }
-    console.log("\n\n");
+  }
+
+  if (toPrint.length > 0) {
+    console.log(toPrint.join(" "));
+  }
+
+  console.log("\n\n");
 }
+*/

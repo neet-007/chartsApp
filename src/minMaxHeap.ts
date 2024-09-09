@@ -3,6 +3,8 @@
 
 class MinMaxHeap {
   heap: number[] = [];
+  heapMap: Map<number, number[]> = new Map();
+
 
   private isMinLevel(index: number): boolean {
     return Math.floor(Math.log2(index + 1)) % 2 === 0;
@@ -127,9 +129,14 @@ class MinMaxHeap {
   }
 
   private swap(i: number, j: number): void {
-    const temp = this.heap[i];
-    this.heap[i] = this.heap[j];
-    this.heap[j] = temp;
+    const listI = this.heapMap.get(this.heap[i])!;
+    const listJ = this.heapMap.get(this.heap[j])!;
+
+    listI[listI.indexOf(i)] = j;
+    listJ[listJ.indexOf(j)] = i;
+
+    [this.heap[i], this.heap[j]] = [this.heap[j], this.heap[i]];
+
   }
 
   public insert(value: number): void {
@@ -156,11 +163,27 @@ class MinMaxHeap {
 
   public buildHeap(array: number[]): void {
     this.heap = array.slice();
+
+    for (let i = 0; i < this.heap.length; i++) {
+      const list = this.heapMap.get(this.heap[i]);
+      if (list) {
+        list.push(i);
+      } else {
+        this.heapMap.set(this.heap[i], [i]);
+      }
+    }
+
     for (let i = Math.floor(this.heap.length / 2) - 1; i >= 0; i--) {
       this.pushDownIter(i);
     }
   }
 }
+
+const arr = Array.from({ length: 10 }).map(() => Math.floor(Math.random() * 100));
+const heap = new MinMaxHeap();
+heap.buildHeap(arr);
+console.log(heap.heap);
+console.log(heap.heapMap)
 
 /*
 for (let k = 0; k < 10; k++) {
