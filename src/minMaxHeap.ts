@@ -1,7 +1,7 @@
 // EVEN levels are min
 // ODD levels are max
 
-class MinMaxHeap {
+export class MinMaxHeap {
   heap: number[] = [];
   heapMap: Map<number, number[]> = new Map();
 
@@ -159,6 +159,18 @@ class MinMaxHeap {
     this.heap[maxIndex] = this.heap.pop()!;
     this.pushDownIter(maxIndex);
     return max;
+  }
+
+  public peakMin(): number | null {
+    if (this.heap.length === 0) return null;
+    return this.heap[0];
+  }
+
+  public peakMax(): number | null {
+    if (this.heap.length === 0) return null;
+    if (this.heap.length === 1) return this.heap[0];
+    if (this.heap.length === 2) return this.heap[1];
+    return this.heap[1] > this.heap[2] ? this.heap[1] : this.heap[2];
   }
 
   public update(oldValue: number, newValue: number, count: number): void {
@@ -321,20 +333,6 @@ class MinMaxHeap {
     }
   }
 }
-
-let arr = Array.from({ length: 20 }).map(() => Math.floor(Math.random() * 100));
-arr = arr.filter(x => x !== 4);
-arr.push(4);
-arr.push(4)
-const heap = new MinMaxHeap();
-heap.buildHeap(arr);
-console.log(heap.heap);
-console.log(heap.heapMap);
-const deleteVals = arr.filter((_, i) => i % 5 === 0).map(x => x === 4 ? [x, 0] as [number, number] : [x, 0] as [number, number]);
-console.log("delete, count: ", deleteVals.join(" "));
-heap.bulkDelete(deleteVals);
-console.log(heap.heap)
-console.log(heap.heapMap);
 
 /*
 for (let k = 0; k < 10; k++) {

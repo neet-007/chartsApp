@@ -1,9 +1,11 @@
-import { FC, ComponentProps, useState, useContext, createContext } from "react";
+import { FC, ComponentProps, useState, useContext, createContext, useEffect } from "react";
+import { MinMaxHeap } from "../minMaxHeap";
 
 type DataContextType = {
   headers: string[];
   sideHeaders: { header: string, color: string }[];
   data: number[][];
+  minMaxHeap: MinMaxHeap;
   onCellChange: (row: number, col: number, v: string) => void;
   onHeaderChange: (cell: number, v: string) => void;
   onSideHeaderChange: (cell: number, v: string) => void;
@@ -13,6 +15,7 @@ const INITIAL_STATE: DataContextType = {
   headers: [],
   sideHeaders: [],
   data: [],
+  minMaxHeap: new MinMaxHeap(),
   onCellChange: () => { },
   onHeaderChange: () => { },
   onSideHeaderChange: () => { },
@@ -58,6 +61,11 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
         .map(() => Math.floor(Math.random() * 10)))
 
   );
+  const [minMaxHeap, _] = useState<MinMaxHeap>(new MinMaxHeap());
+
+  useEffect(() => {
+    minMaxHeap.buildHeap(data.flat());
+  }, [])
 
   function onCellChange(row: number, col: number, v: string) {
     if (data[row][col] === Number(v)) {
@@ -66,6 +74,8 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
 
     setData(prev => {
       const newData = [...prev];
+      minMaxHeap.update(newData[row][col], Number(v), 1);
+
       newData[row][col] = Number(v);
 
       return newData
@@ -102,6 +112,7 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
     headers,
     sideHeaders,
     data,
+    minMaxHeap,
     onCellChange,
     onHeaderChange,
     onSideHeaderChange
