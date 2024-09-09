@@ -12,13 +12,15 @@ export const CanvasControl: FC<ComponentProps<"div">> = () => {
 					...prev,
 					height: Number(e.target.value)
 				}))}
-				max={1100} />
+				max={2000}
+				min={100} />
 			<input type="range" value={dimenstions.width}
 				onChange={e => setDimenstions(prev => ({
 					...prev,
 					width: Number(e.target.value)
 				}))}
-				max={1100} />
+				max={2000}
+				min={100} />
 			<div className="flex gap-2">
 				<label htmlFor="titleInput">set title</label>
 				<input name="titleInput" id="titleInput"

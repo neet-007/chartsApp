@@ -124,13 +124,16 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 			yLabelValue = Math.floor(yLabelValue - numberOfSteps);
 		}
 
+		const headersOffset: number[] = Array.from({ length: headers.length })
 		for (let i = 0; i < headers.length; i++) {
+			headersOffset[i] = xOffset + i * multX;
 			if (i === 0) {
 				canvasCtx.fillText(headers[i],
 					xOffset + i * multX,
 					height - yOffset + 20);
 				continue
 			}
+			headersOffset[i] = xOffset + i * multX - canvasCtx.measureText(headers[i]).width / 2;
 			canvasCtx.fillText(headers[i],
 				xOffset + i * multX - canvasCtx.measureText(headers[i]).width / 2,
 				height - yOffset + 20);
@@ -149,38 +152,44 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		canvasCtx.stroke(bottomLine);
 
 		canvasCtx.font = `${fontSize}px Arial`;
-		const textHeightMap = data.map(row => row.map(value => {
-			const metrics = canvasCtx.measureText(`${value}`);
-			return metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-		}));
 
 		canvasCtx.fillStyle = "black";
 		canvasCtx.globalCompositeOperation = 'destination-over';
+		const barWidth = 5;
+		const barSpacing = barWidth / 2;
+
+		canvasCtx.globalCompositeOperation = 'source-over';
+		canvasCtx.lineWidth = 2;
+		canvasCtx.lineJoin = "round";
+		canvasCtx.shadowColor = "rgba(0, 0, 0, 0.2)";
+		canvasCtx.shadowBlur = 4;
+		canvasCtx.shadowOffsetX = 2;
+		canvasCtx.shadowOffsetY = 2;
+		canvasCtx.font = `${fontSize * 0.75}px Arial`;
+
 		for (let i = 0; i < data.length; i++) {
-			const line = new Path2D();
-			const initialY = yOffset + (1 - data[i][0] / maxVal) * (height - 2 * yOffset);
+			for (let j = 0; j < data[i].length; j++) {
+				canvasCtx.strokeStyle = sideHeaders[i].color;
+				canvasCtx.fillStyle = sideHeaders[i].color;
+				const rect_ = new Path2D();
+				const x = headersOffset[j] + i * (barWidth + barSpacing);
 
-			line.moveTo(xOffset, initialY);
+				const barHeight = (data[i][j] / maxVal) * (height - 2 * yOffset);
 
-			canvasCtx.fillText(data[i][0].toString(), xOffset, initialY - textHeightMap[i][0] / 2);
+				const y = height - yOffset - barHeight;
 
-			for (let j = 1; j < data[i].length; j++) {
-				const x = xOffset + j * multX;
-				const y = yOffset + (1 - data[i][j] / maxVal) * (height - 2 * yOffset);
-				line.lineTo(x, y);
-
-				canvasCtx.fillText(data[i][j].toString(), x, y - textHeightMap[i][j] / 2);
+				rect_.rect(x, y, barWidth, barHeight);
+				canvasCtx.fill(rect_);
+				canvasCtx.strokeStyle = "black";
+				canvasCtx.fillStyle = "black";
+				const metrics = canvasCtx.measureText(`${data[i][j]}`);
+				const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+				if (j === 0) {
+					canvasCtx.fillText(`${data[i][j]}`, x, y - (textHeight / 2));
+				} else {
+					canvasCtx.fillText(`${data[i][j]}`, x - (metrics.width / 2), y - (textHeight / 2));
+				}
 			}
-
-			canvasCtx.globalCompositeOperation = 'source-over';
-			canvasCtx.strokeStyle = sideHeaders[i].color;
-			canvasCtx.lineWidth = 2;
-			canvasCtx.lineJoin = "round";
-			canvasCtx.shadowColor = "rgba(0, 0, 0, 0.2)";
-			canvasCtx.shadowBlur = 4;
-			canvasCtx.shadowOffsetX = 2;
-			canvasCtx.shadowOffsetY = 2;
-			canvasCtx.stroke(line);
 		}
 
 		canvasCtx.strokeStyle = "#000000";
@@ -223,7 +232,6 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 				height += 30;
 			}
 		}
-
 
 		return () => {
 			canvasCtx.clearRect(0, 0, width, height);
