@@ -3,6 +3,8 @@ import { useDataContext } from "../../context/DataContext";
 import { useCanvasContext } from "../../context/CanvasContext";
 import { useSetTitles } from "../../hooks/SetTitles";
 import { generateSteps } from "../../utils/generateSteps";
+import { Button } from "../shared/Button";
+import { canvasDownload } from "../../utils/canvasDownload";
 
 export const HBarChart: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data, minMaxHeap } = useDataContext();
@@ -218,6 +220,9 @@ export const HBarChart: FC<ComponentProps<"div">> = () => {
 			ref={canvasRef}
 		>
 		</canvas>
+		<Button onClick={() => canvasDownload(canvasRef, canvasBg, title)}>
+			download canvas
+		</Button>
 	</div>
 	)
 }

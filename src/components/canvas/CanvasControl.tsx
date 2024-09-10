@@ -120,6 +120,9 @@ export const CanvasControl: FC<ComponentProps<"div">> = () => {
 					}
 				</div>
 			</div>
+			<div id="download-button">
+
+			</div>
 		</div>
 	)
 }

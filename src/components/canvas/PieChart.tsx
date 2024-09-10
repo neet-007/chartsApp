@@ -2,6 +2,8 @@ import { ComponentProps, FC, useEffect, useRef } from "react";
 import { useDataContext } from "../../context/DataContext";
 import { useCanvasContext } from "../../context/CanvasContext";
 import { useSetTitles } from "../../hooks/SetTitles";
+import { Button } from "../shared/Button";
+import { canvasDownload } from "../../utils/canvasDownload";
 
 
 function hexToRgb(hex: string) {
@@ -170,6 +172,9 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 			ref={canvasRef}
 		>
 		</canvas>
+		<Button onClick={() => canvasDownload(canvasRef, canvasBg, title)}>
+			download canvas
+		</Button>
 	</div>
 	)
 }
