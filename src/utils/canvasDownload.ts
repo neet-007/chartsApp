@@ -9,19 +9,29 @@ export function canvasDownload(canvasRef: RefObject<HTMLCanvasElement>, canvasBg
     return
   };
 
-  const imgData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
+  const imageDataUrl = canvasRef.current.toDataURL("image/png");
 
-  ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-  console.log(canvasBg)
-  ctx.fillStyle = canvasBg;
-  ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-  ctx.putImageData(imgData, 0, 0)
+  const img = new Image();
+  img.src = imageDataUrl;
 
-  const dataURL = canvasRef.current.toDataURL('image/png', 0.9);
+  img.onload = function() {
+    if (!canvasRef.current) {
+      return
+    }
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-  const link = document.createElement('a');
-  link.href = dataURL;
-  link.download = `${title}-canvas.png`;
+    ctx.fillStyle = canvasBg;
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctx.drawImage(img, 0, 0);
 
-  link.click();
+    const dataURL = canvasRef.current.toDataURL('image/png', 0.9);
+
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = `${title}-canvas.png`;
+
+    link.click();
+  };
+
+
 }
