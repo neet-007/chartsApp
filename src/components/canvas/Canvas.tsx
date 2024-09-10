@@ -10,6 +10,47 @@ function generateSteps(minVal: number, maxVal: number, cap: number) {
 	return Math.ceil(range / numSteps);
 }
 
+function getRandomColor() {
+	const letters = '0123456789ABCDEF';
+	let color = '#';
+	for (let i = 0; i < 6; i++) {
+		color += letters[Math.floor(Math.random() * 16)];
+	}
+	return {
+		backgroundColor: color,
+		textColor: getContrastColor(color)
+	};
+}
+
+// Function to convert hex color to RGB
+function hexToRgb(hex: string) {
+	const bigint = parseInt(hex.slice(1), 16);
+	const r = (bigint >> 16) & 255;
+	const g = (bigint >> 8) & 255;
+	const b = bigint & 255;
+	return [r, g, b];
+}
+
+// Function to calculate luminance
+function getLuminance(r: number, g: number, b: number) {
+	r = r / 255;
+	g = g / 255;
+	b = b / 255;
+
+	r = (r <= 0.03928) ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+	g = (g <= 0.03928) ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+	b = (b <= 0.03928) ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+
+	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+// Function to get contrast text color based on background color
+function getContrastColor(hex: string) {
+	const [r, g, b] = hexToRgb(hex);
+	const luminance = getLuminance(r, g, b);
+	return luminance > 0.5 ? '#000000' : '#FFFFFF';  // Black for light colors, white for dark
+}
+
 export const Canvas: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data, minMaxHeap } = useDataContext();
 	const { dimenstions, title, subTitle } = useCanvasContext();
@@ -76,30 +117,11 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		const width = canvasRef.current.width;
 		const yOffset = 100;
 		const xOffset = 50;
+		const radius = 100;
+		const cx = (width + xOffset - (radius / 2)) / 2;
+		const cy = (height - yOffset + (radius / 2)) / 2;
+		const sum = data[0].reduce((acc, curr) => acc + curr);
 		const fontSize = 16;
-
-		const maxVal = Math.floor(
-			data.flat().reduce(
-				(acc, val) => Math.max(acc, val),
-				0
-			)
-		);
-		//const maxVal = minMaxHeap.peakMax()!;
-		const minVal = Math.floor(
-			data.flat().reduce(
-				(acc, val) => Math.min(acc, val),
-				data[0][0]
-			)
-		);
-		//const minVal = minMaxHeap.peakMin()!;
-
-		const numberOfSteps = generateSteps(minVal, maxVal, 20)
-		const multX = (width - 2 * xOffset) / ((maxVal - minVal) / numberOfSteps);
-		//const multY = (height - 2 * yOffset) / ((maxVal - minVal) / numberOfSteps);
-		//const multX = (width - 2 * xOffset) / (headers.length);
-		const multY = (height - 2 * yOffset) / (headers.length);
-
-		//canvasCtx.clearRect(0, 0, width, height);
 
 		canvasCtx.font = `${fontSize * 1.5}px Arial`;
 		canvasCtx.fillStyle = "black";
@@ -112,118 +134,58 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 			(fontSize * 1.5) + 5);
 
 		canvasCtx.font = `${fontSize}px Arial`;
-		canvasCtx.fillStyle = "black";
-		let yLabelValue = minVal;
-		for (let x = xOffset; x <= width - xOffset; x += multX) {
-			if (yLabelValue === 0) {
-				yLabelValue = Math.floor(yLabelValue + numberOfSteps);
-				continue
-			}
-			const metrics = canvasCtx.measureText(`${yLabelValue}`);
-			const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-			canvasCtx.fillText(`${yLabelValue}`, x - (metrics.width),
-				height - yOffset + textHeight);
-			//canvasCtx.fillText(`${yLabelValue}`, xOffset - 20, y +
-			//(textHeight / 2));
-			yLabelValue = Math.floor(yLabelValue + numberOfSteps);
-		}
-
-		const headersOffset: number[] = Array.from({ length: headers.length });
-		const headersHeights: number[] = Array.from({ length: headers.length });
-		for (let i = 0; i < headers.length; i++) {
-			headersOffset[i] = yOffset + i * multY;
-			const metrics = canvasCtx.measureText(`${headers[i]}`);
-			const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-			headersHeights[i] = textHeight;
-
-			if (i === 0) {
-				canvasCtx.fillText(headers[i],
-					xOffset - canvasCtx.measureText(headers[i]).width,
-					yOffset + i * multY + (textHeight / 2));
-				continue
-			}
-			headersOffset[i] = yOffset + i * multY - canvasCtx.measureText(headers[i]).width / 2;
-			canvasCtx.fillText(headers[i],
-				xOffset - canvasCtx.measureText(headers[i]).width,
-				yOffset + i * multY + (textHeight / 2));
-		}
-
-		const sideLine = new Path2D();
-		sideLine.moveTo(xOffset, yOffset);
-		sideLine.lineTo(xOffset, height - yOffset);
-
-		const bottomLine = new Path2D();
-		bottomLine.moveTo(xOffset, height - yOffset);
-		bottomLine.lineTo(width - xOffset, height - yOffset);
-
 		canvasCtx.strokeStyle = "black";
-		canvasCtx.stroke(sideLine);
-		canvasCtx.stroke(bottomLine);
 
-		const barHeight = 2;
-		const barSpacing = barHeight;
+		let startAngle = 0;
+		const headersColors = Array.from({ length: headers.length }, () => ({
+			backgroundColor: '',
+			textColor: ''
+		}));
 
-		canvasCtx.lineWidth = 2;
-		canvasCtx.lineJoin = "round";
-		canvasCtx.shadowColor = "rgba(0, 0, 0, 0.2)";
-		canvasCtx.shadowBlur = 4;
-		canvasCtx.shadowOffsetX = 2;
-		canvasCtx.shadowOffsetY = 2;
-		canvasCtx.font = `${fontSize * 0.75}px Arial`;
+		for (let i = 0; i < data[0].length; i++) {
+			const endAngle = startAngle + ((data[0][i] / sum) * Math.PI * 2);
 
-		for (let i = 0; i < data.length; i++) {
-			for (let j = 0; j < data[i].length; j++) {
-				canvasCtx.strokeStyle = sideHeaders[i].color;
-				canvasCtx.fillStyle = sideHeaders[i].color;
-				const rect_ = new Path2D();
-				const y = headersOffset[j] + i * (barHeight + barSpacing) + headersHeights[j];
+			canvasCtx.beginPath();
+			canvasCtx.arc(cx, cy, radius, startAngle, endAngle);
+			canvasCtx.lineTo(cx, cy);
 
-				const barWidth = (data[i][j] / maxVal) * (width - 2 * xOffset);
+			headersColors[i] = getRandomColor();
+			canvasCtx.fillStyle = headersColors[i].backgroundColor;
+			canvasCtx.fill();
 
-				const x = xOffset;
+			const startX = cx + radius * Math.cos(startAngle);
+			const startY = cy + radius * Math.sin(startAngle);
+			const endX = cx + radius * Math.cos(endAngle);
+			const endY = cy + radius * Math.sin(endAngle);
 
-				rect_.rect(x, y, barWidth, barHeight);
-				canvasCtx.fill(rect_);
+			canvasCtx.beginPath();
+			canvasCtx.moveTo(cx, cy);
+			canvasCtx.lineTo(startX, startY);
+			canvasCtx.stroke();
 
+			canvasCtx.beginPath();
+			canvasCtx.moveTo(cx, cy);
+			canvasCtx.lineTo(endX, endY);
+			canvasCtx.stroke();
+
+			if (data[0][i] > 0) {
+				const middleAngle = startAngle + (endAngle - startAngle) / 2;
+				const textX = cx + (radius / 2) * Math.cos(middleAngle);
+				const textY = cy + (radius / 2) * Math.sin(middleAngle);
+
+				canvasCtx.fillStyle = headersColors[i].textColor;
+				canvasCtx.textAlign = 'center';
+				canvasCtx.textBaseline = 'middle';
+				canvasCtx.fillText(`${data[0][i]}`, textX, textY);
 			}
+
+			startAngle = endAngle;
 		}
-
-		canvasCtx.strokeStyle = "black";
-		canvasCtx.fillStyle = "black";
-		canvasCtx.globalCompositeOperation = 'source-over';
-		for (let i = 0; i < data.length; i++) {
-			for (let j = 0; j < data[i].length; j++) {
-				if (data[i][j] === 0) {
-					continue
-				}
-				const y = headersOffset[j] + i * (barHeight + barSpacing) + headersHeights[j];
-
-				const barWidth = (data[i][j] / maxVal) * (width - 2 * xOffset);
-
-				const x = xOffset;
-				const metrics = canvasCtx.measureText(`${data[i][j]}`);
-				const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-				if (j === 0) {
-					canvasCtx.fillText(`${data[i][j]}`, x + barWidth, y + (textHeight / 2));
-				} else {
-					canvasCtx.fillText(`${data[i][j]}`, x + (metrics.width / 2) + barWidth, y + (textHeight / 2));
-				}
-			}
-		}
-
-		canvasCtx.strokeStyle = "#000000";
-		canvasCtx.lineWidth = 1;
-		canvasCtx.lineJoin = "miter";
-		canvasCtx.shadowColor = "rgba(0, 0, 0, 0)";
-		canvasCtx.shadowBlur = 0;
-		canvasCtx.shadowOffsetX = 0;
-		canvasCtx.shadowOffsetY = 0;
-		canvasCtx.font = `${fontSize}px Arial`;
 
 		let accWidth = 0;
 		let textHeight = 50;
-		for (let i = 0; i < sideHeaders.length; i++) {
-			accWidth += (canvasCtx.measureText(sideHeaders[i].header).width + 24);
+		for (let i = 0; i < headers.length; i++) {
+			accWidth += (canvasCtx.measureText(headers[i]).width + 24);
 			if (accWidth >= width) {
 				accWidth = 0;
 				textHeight += 80;
@@ -238,15 +200,15 @@ export const Canvas: FC<ComponentProps<"div">> = () => {
 		}
 
 		accWidth = 0;
-		for (let i = 0; i < sideHeaders.length; i++) {
-			canvasCtx.fillStyle = sideHeaders[i].color;
+		for (let i = 0; i < headers.length; i++) {
+			canvasCtx.fillStyle = headersColors[i].backgroundColor;
 			canvasCtx.fillRect(xOffset + accWidth, height - yOffset + 40, 10, 10);
 
 			canvasCtx.fillStyle = "#000000";
-			canvasCtx.fillText(sideHeaders[i].header, xOffset + 14 + accWidth,
+			canvasCtx.fillText(headers[i], xOffset + 44 + accWidth,
 				height - yOffset + 50);
-			accWidth += (canvasCtx.measureText(sideHeaders[i].header).width + 24);
-			if (accWidth + canvasCtx.measureText(sideHeaders[i].header).width * 1.5 >= width) {
+			accWidth += (canvasCtx.measureText(headers[i]).width + 24);
+			if (accWidth + canvasCtx.measureText(headers[i]).width * 1.5 >= width) {
 				accWidth = 0;
 				height += 30;
 			}

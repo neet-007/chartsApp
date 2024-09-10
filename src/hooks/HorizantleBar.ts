@@ -25,22 +25,18 @@ export function useLineChart(canvasRef: RefObject<HTMLCanvasElement>, data: [num
         0
       )
     );
-    //const maxVal = minMaxHeap.peakMax()!;
+
     const minVal = Math.floor(
       data.flat().reduce(
         (acc, val) => Math.min(acc, val),
         data[0][0]
       )
     );
-    //const minVal = minMaxHeap.peakMin()!;
 
     const numberOfSteps = generateSteps(minVal, maxVal, 20)
-    const multX = (width - 2 * xOffset) / ((maxVal - minVal) / numberOfSteps);
-    //const multY = (height - 2 * yOffset) / ((maxVal - minVal) / numberOfSteps);
-    //const multX = (width - 2 * xOffset) / (headers.length);
-    const multY = (height - 2 * yOffset) / (headers.length);
+    const multY = (height - 2 * yOffset) / ((maxVal - minVal) / numberOfSteps);
+    const multX = (width - 2 * xOffset) / (headers.length);
 
-    //canvasCtx.clearRect(0, 0, width, height);
 
     canvasCtx.font = `${fontSize * 1.5}px Arial`;
     canvasCtx.fillStyle = "black";
@@ -54,39 +50,32 @@ export function useLineChart(canvasRef: RefObject<HTMLCanvasElement>, data: [num
 
     canvasCtx.font = `${fontSize}px Arial`;
     canvasCtx.fillStyle = "black";
-    let yLabelValue = minVal;
-    for (let x = xOffset; x <= width - xOffset; x += multX) {
+    let yLabelValue = maxVal;
+    for (let y = yOffset; y <= height - yOffset; y += multY) {
       if (yLabelValue === 0) {
-        yLabelValue = Math.floor(yLabelValue + numberOfSteps);
+        yLabelValue = Math.floor(yLabelValue - numberOfSteps);
         continue
       }
       const metrics = canvasCtx.measureText(`${yLabelValue}`);
       const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-      canvasCtx.fillText(`${yLabelValue}`, x - (metrics.width),
-        height - yOffset + textHeight);
-      //canvasCtx.fillText(`${yLabelValue}`, xOffset - 20, y +
-      //(textHeight / 2));
-      yLabelValue = Math.floor(yLabelValue + numberOfSteps);
+      canvasCtx.fillText(`${yLabelValue}`, xOffset - 20, y +
+        (textHeight / 2));
+      yLabelValue = Math.floor(yLabelValue - numberOfSteps);
     }
 
-    const headersOffset: number[] = Array.from({ length: headers.length });
-    const headersHeights: number[] = Array.from({ length: headers.length });
+    const headersOffset: number[] = Array.from({ length: headers.length })
     for (let i = 0; i < headers.length; i++) {
-      headersOffset[i] = yOffset + i * multY;
-      const metrics = canvasCtx.measureText(`${headers[i]}`);
-      const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-      headersHeights[i] = textHeight;
-
+      headersOffset[i] = xOffset + i * multX;
       if (i === 0) {
         canvasCtx.fillText(headers[i],
-          xOffset - canvasCtx.measureText(headers[i]).width,
-          yOffset + i * multY + (textHeight / 2));
+          xOffset + i * multX,
+          height - yOffset + 20);
         continue
       }
-      headersOffset[i] = yOffset + i * multY - canvasCtx.measureText(headers[i]).width / 2;
+      headersOffset[i] = xOffset + i * multX - canvasCtx.measureText(headers[i]).width / 2;
       canvasCtx.fillText(headers[i],
-        xOffset - canvasCtx.measureText(headers[i]).width,
-        yOffset + i * multY + (textHeight / 2));
+        xOffset + i * multX - canvasCtx.measureText(headers[i]).width / 2,
+        height - yOffset + 20);
     }
 
     const sideLine = new Path2D();
@@ -101,9 +90,14 @@ export function useLineChart(canvasRef: RefObject<HTMLCanvasElement>, data: [num
     canvasCtx.stroke(sideLine);
     canvasCtx.stroke(bottomLine);
 
-    const barHeight = 2;
-    const barSpacing = barHeight;
+    canvasCtx.font = `${fontSize}px Arial`;
 
+    canvasCtx.fillStyle = "black";
+    canvasCtx.globalCompositeOperation = 'destination-over';
+    const barWidth = 5;
+    const barSpacing = barWidth / 2;
+
+    canvasCtx.globalCompositeOperation = 'source-over';
     canvasCtx.lineWidth = 2;
     canvasCtx.lineJoin = "round";
     canvasCtx.shadowColor = "rgba(0, 0, 0, 0.2)";
@@ -117,37 +111,22 @@ export function useLineChart(canvasRef: RefObject<HTMLCanvasElement>, data: [num
         canvasCtx.strokeStyle = sideHeaders[i].color;
         canvasCtx.fillStyle = sideHeaders[i].color;
         const rect_ = new Path2D();
-        const y = headersOffset[j] + i * (barHeight + barSpacing) + headersHeights[j];
+        const x = headersOffset[j] + i * (barWidth + barSpacing);
 
-        const barWidth = (data[i][j] / maxVal) * (width - 2 * xOffset);
+        const barHeight = (data[i][j] / maxVal) * (height - 2 * yOffset);
 
-        const x = xOffset;
+        const y = height - yOffset - barHeight;
 
         rect_.rect(x, y, barWidth, barHeight);
         canvasCtx.fill(rect_);
-
-      }
-    }
-
-    canvasCtx.strokeStyle = "black";
-    canvasCtx.fillStyle = "black";
-    canvasCtx.globalCompositeOperation = 'source-over';
-    for (let i = 0; i < data.length; i++) {
-      for (let j = 0; j < data[i].length; j++) {
-        if (data[i][j] === 0) {
-          continue
-        }
-        const y = headersOffset[j] + i * (barHeight + barSpacing) + headersHeights[j];
-
-        const barWidth = (data[i][j] / maxVal) * (width - 2 * xOffset);
-
-        const x = xOffset;
+        canvasCtx.strokeStyle = "black";
+        canvasCtx.fillStyle = "black";
         const metrics = canvasCtx.measureText(`${data[i][j]}`);
         const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
         if (j === 0) {
-          canvasCtx.fillText(`${data[i][j]}`, x + barWidth, y + (textHeight / 2));
+          canvasCtx.fillText(`${data[i][j]}`, x, y - (textHeight / 2));
         } else {
-          canvasCtx.fillText(`${data[i][j]}`, x + (metrics.width / 2) + barWidth, y + (textHeight / 2));
+          canvasCtx.fillText(`${data[i][j]}`, x - (metrics.width / 2), y - (textHeight / 2));
         }
       }
     }
