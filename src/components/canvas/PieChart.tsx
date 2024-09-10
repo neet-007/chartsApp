@@ -32,7 +32,7 @@ function getContrastColor(hex: string) {
 
 export const PieChart: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data, minMaxHeap } = useDataContext();
-	const { dimenstions, title, subTitle } = useCanvasContext();
+	const { dimenstions, title, subTitle, pieChartRow, canvasBg } = useCanvasContext();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useSetTitles(canvasRef, title, subTitle);
@@ -54,7 +54,7 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 		const radius = 100;
 		const cx = (width + xOffset - (radius / 2)) / 2;
 		const cy = (height - yOffset + (radius / 2)) / 2;
-		const sum = data[0].reduce((acc, curr) => acc + curr);
+		const sum = data[pieChartRow].reduce((acc, curr) => acc + curr);
 		const fontSize = 16;
 
 		canvasCtx.font = `${fontSize * 1.5}px Arial`;
@@ -76,8 +76,8 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 			textColor: ''
 		}));
 
-		for (let i = 0; i < data[0].length; i++) {
-			const endAngle = startAngle + ((data[0][i] / sum) * Math.PI * 2);
+		for (let i = 0; i < data[pieChartRow].length; i++) {
+			const endAngle = startAngle + ((data[pieChartRow][i] / sum) * Math.PI * 2);
 
 			canvasCtx.beginPath();
 			canvasCtx.arc(cx, cy, radius, startAngle, endAngle);
@@ -105,7 +105,7 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 			canvasCtx.lineTo(endX, endY);
 			canvasCtx.stroke();
 
-			if (data[0][i] > 0) {
+			if (data[pieChartRow][i] > 0) {
 				const middleAngle = startAngle + (endAngle - startAngle) / 2;
 				const textX = cx + (radius / 2) * Math.cos(middleAngle);
 				const textY = cy + (radius / 2) * Math.sin(middleAngle);
@@ -113,7 +113,7 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 				canvasCtx.fillStyle = headersColors[i].textColor;
 				canvasCtx.textAlign = 'center';
 				canvasCtx.textBaseline = 'middle';
-				canvasCtx.fillText(`${data[0][i]}`, textX, textY);
+				canvasCtx.fillText(`${data[pieChartRow][i]}`, textX, textY);
 			}
 
 			startAngle = endAngle;
@@ -161,10 +161,12 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 			canvasCtx.shadowOffsetX = 0;
 			canvasCtx.shadowOffsetY = 0;
 		}
-	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width]);
+	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width,
+		pieChartRow]);
 
 	return (<div>
-		<canvas className="bg-gray-400" width={dimenstions.width} height={dimenstions.height}
+		<canvas style={{ backgroundColor: canvasBg }}
+			width={dimenstions.width} height={dimenstions.height}
 			ref={canvasRef}
 		>
 		</canvas>

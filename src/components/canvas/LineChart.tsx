@@ -7,7 +7,7 @@ import { generateSteps } from "../../utils/generateSteps";
 
 export const LineChart: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data, minMaxHeap } = useDataContext();
-	const { dimenstions, title, subTitle } = useCanvasContext();
+	const { dimenstions, title, subTitle, canvasBg } = useCanvasContext();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useSetTitles(canvasRef, title, subTitle);
@@ -188,7 +188,8 @@ export const LineChart: FC<ComponentProps<"div">> = () => {
 	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width]);
 
 	return (<div>
-		<canvas className="bg-gray-400" width={dimenstions.width} height={dimenstions.height}
+		<canvas style={{ backgroundColor: canvasBg }}
+			width={dimenstions.width} height={dimenstions.height}
 			ref={canvasRef}
 		>
 		</canvas>

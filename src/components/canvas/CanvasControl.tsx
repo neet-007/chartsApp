@@ -6,8 +6,9 @@ import { useDataContext } from "../../context/DataContext";
 export const CanvasControl: FC<ComponentProps<"div">> = () => {
 	const { dimenstions, setDimenstions,
 		title, subTitle, setTitle, setSubTitle,
-		chartType, setChartType } = useCanvasContext()
-	const { headers, sideHeaders, setSideHeadersColors, setHeadersColors } = useDataContext();
+		chartType, setChartType, pieChartRow, setPieChartRow, canvasBg,
+		setCanvasBg } = useCanvasContext()
+	const { headers, sideHeaders, setSideHeadersColors, setHeadersColors, data } = useDataContext();
 
 	return (
 		<div className="fixed right-0 top-0 z-50">
@@ -28,6 +29,29 @@ export const CanvasControl: FC<ComponentProps<"div">> = () => {
 
 			<Input title="set sub title" defaultValue={subTitle} type="text"
 				onChange={(e: ChangeEvent<HTMLInputElement>) => setSubTitle(e.target.value)} />
+
+			<Input title="canvas background" defaultValue={canvasBg}
+				type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => {
+					setCanvasBg(e.target.value)
+				}} />
+
+			{chartType === "pie" &&
+				<div>
+					<label htmlFor="set pie chart row">set pie chart row</label>
+					<select name="set pie chart row" id="set pie chart row"
+						defaultValue={pieChartRow}
+						onChange={e => {
+							setPieChartRow(prev => Number(e.target.value) >= data.length ? prev : Number(e.target.value))
+						}}
+						className="bg-white border-2 border-black">
+						{data.map((_, i) => (
+							<option key={`pie-chart-{i}`} value={i}>
+								{i + 1}
+							</option>
+						))}
+					</select>
+				</div>
+			}
 			<div>
 				<label htmlFor="chart-type">chart type</label>
 				<select name="chart-type" id="chart-type"
