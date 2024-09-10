@@ -86,14 +86,14 @@ export const HBarChart: FC<ComponentProps<"div">> = () => {
 			headersHeights[i] = textHeight;
 
 			if (i === 0) {
-				canvasCtx.fillText(headers[i],
-					xOffset - canvasCtx.measureText(headers[i]).width,
+				canvasCtx.fillText(headers[i].header,
+					xOffset - canvasCtx.measureText(headers[i].header).width,
 					yOffset + i * multY + (textHeight / 2));
 				continue
 			}
-			headersOffset[i] = yOffset + i * multY - canvasCtx.measureText(headers[i]).width / 2;
-			canvasCtx.fillText(headers[i],
-				xOffset - canvasCtx.measureText(headers[i]).width,
+			headersOffset[i] = yOffset + i * multY - canvasCtx.measureText(headers[i].header).width / 2;
+			canvasCtx.fillText(headers[i].header,
+				xOffset - canvasCtx.measureText(headers[i].header).width,
 				yOffset + i * multY + (textHeight / 2));
 		}
 

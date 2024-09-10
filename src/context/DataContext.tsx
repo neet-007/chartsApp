@@ -2,13 +2,15 @@ import { FC, ComponentProps, useState, useContext, createContext, useEffect } fr
 import { MinMaxHeap } from "../minMaxHeap";
 
 type DataContextType = {
-  headers: string[];
+  headers: { header: string, color: string }[];
   sideHeaders: { header: string, color: string }[];
   data: number[][];
   minMaxHeap: MinMaxHeap;
   onCellChange: (row: number, col: number, v: string) => void;
   onHeaderChange: (cell: number, v: string) => void;
   onSideHeaderChange: (cell: number, v: string) => void;
+  setSideHeadersColors: (t: number, color: string) => void;
+  setHeadersColors: (t: number, color: string) => void;
 }
 
 const INITIAL_STATE: DataContextType = {
@@ -19,6 +21,8 @@ const INITIAL_STATE: DataContextType = {
   onCellChange: () => { },
   onHeaderChange: () => { },
   onSideHeaderChange: () => { },
+  setSideHeadersColors: () => { },
+  setHeadersColors: () => { },
 };
 
 const HEADERS = [
@@ -46,8 +50,11 @@ function generateRandomColor() {
 }
 
 export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => {
-  const [headers, setHeaders] = useState<string[]>(
-    Array.from({ length: 5 }).map(() => HEADERS[Math.floor(Math.random() * HEADERS.length)])
+  const [headers, setHeaders] = useState<{ header: string, color: string }[]>(
+    Array.from({ length: 5 }).map(() => ({
+      header: HEADERS[Math.floor(Math.random() * HEADERS.length)],
+      color: generateRandomColor(),
+    }))
   );
   const [sideHeaders, setSideHeaders] = useState<{ header: string, color: string }[]>(
     Array.from({ length: 10 }).map(() => ({
@@ -83,13 +90,13 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
   }
 
   function onHeaderChange(cell: number, v: string) {
-    if (headers[cell] === v) {
+    if (headers[cell].header === v) {
       return
     }
 
     setHeaders(prev => {
       const newData = [...prev];
-      newData[cell] = v;
+      newData[cell].header = v;
 
       return newData
     })
@@ -108,6 +115,14 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
     })
   }
 
+  function setHeadersColors(t: number, color: string) {
+    setHeaders(prev => prev.map((x, i) => i === t ? { ...x, color } : x))
+  }
+
+  function setSideHeadersColors(t: number, color: string) {
+    setSideHeaders(prev => prev.map((x, i) => i === t ? { ...x, color } : x))
+  }
+
   const value = {
     headers,
     sideHeaders,
@@ -115,7 +130,9 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
     minMaxHeap,
     onCellChange,
     onHeaderChange,
-    onSideHeaderChange
+    onSideHeaderChange,
+    setHeadersColors,
+    setSideHeadersColors,
   } as DataContextType
 
   return (

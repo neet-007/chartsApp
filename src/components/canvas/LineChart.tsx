@@ -76,13 +76,13 @@ export const LineChart: FC<ComponentProps<"div">> = () => {
 
 		for (let i = 0; i < headers.length; i++) {
 			if (i === 0) {
-				canvasCtx.fillText(headers[i],
+				canvasCtx.fillText(headers[i].header,
 					xOffset + i * multX,
 					height - yOffset + 20);
 				continue
 			}
-			canvasCtx.fillText(headers[i],
-				xOffset + i * multX - canvasCtx.measureText(headers[i]).width / 2,
+			canvasCtx.fillText(headers[i].header,
+				xOffset + i * multX - canvasCtx.measureText(headers[i].header).width / 2,
 				height - yOffset + 20);
 		}
 

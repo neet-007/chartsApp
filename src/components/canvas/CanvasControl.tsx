@@ -1,41 +1,33 @@
-import { ComponentProps, FC } from "react";
+import { ChangeEvent, ComponentProps, FC } from "react";
 import { ChartType, useCanvasContext } from "../../context/CanvasContext";
+import { Input } from "../shared/Input";
+import { useDataContext } from "../../context/DataContext";
 
 export const CanvasControl: FC<ComponentProps<"div">> = () => {
 	const { dimenstions, setDimenstions,
 		title, subTitle, setTitle, setSubTitle,
 		chartType, setChartType } = useCanvasContext()
+	const { headers, sideHeaders, setSideHeadersColors, setHeadersColors } = useDataContext();
 
 	return (
 		<div className="fixed right-0 top-0 z-50">
-			<input type="range" value={dimenstions.height}
-				onChange={e => setDimenstions(prev => ({
-					...prev,
-					height: Number(e.target.value)
-				}))}
+			<Input title="height" value={dimenstions.height}
+				onChange={(e: ChangeEvent<HTMLInputElement>) => setDimenstions(prev => ({ ...prev, height: Number(e.target.value) }))}
+				type="range"
 				max={2000}
 				min={100} />
-			<input type="range" value={dimenstions.width}
-				onChange={e => setDimenstions(prev => ({
-					...prev,
-					width: Number(e.target.value)
-				}))}
+
+			<Input title="width" value={dimenstions.width}
+				onChange={(e: ChangeEvent<HTMLInputElement>) => setDimenstions(prev => ({ ...prev, width: Number(e.target.value) }))}
+				type="range"
 				max={2000}
 				min={100} />
-			<div className="flex gap-2">
-				<label htmlFor="titleInput">set title</label>
-				<input name="titleInput" id="titleInput"
-					className="border-2 border-black"
-					type="text" defaultValue={title}
-					onChange={e => setTitle(e.target.value)} />
-			</div>
-			<div className="flex gap-2">
-				<label htmlFor="subTitleInput">set sub title</label>
-				<input name="subTitleInput" id="subTitleInput"
-					className="border-2 border-black"
-					type="text" defaultValue={subTitle}
-					onChange={e => setSubTitle(e.target.value)} />
-			</div>
+
+			<Input title="set title" defaultValue={title} type="text"
+				onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)} />
+
+			<Input title="set sub title" defaultValue={subTitle} type="text"
+				onChange={(e: ChangeEvent<HTMLInputElement>) => setSubTitle(e.target.value)} />
 			<div>
 				<label htmlFor="chart-type">chart type</label>
 				<select name="chart-type" id="chart-type"
@@ -55,6 +47,54 @@ export const CanvasControl: FC<ComponentProps<"div">> = () => {
 						pie chart
 					</option>
 				</select>
+			</div>
+			{chartType === "pie" &&
+				<div>
+					<p>headers colors</p>
+					<div>
+						{headers.map((x, i) => (
+							<div className="flex gap-1 items-center"
+								key={`${x}-${i}-header-color-input`}>
+								<Input
+									title={x.header}
+									defaultValue={x.color}
+									type="text"
+									onChange={(e: ChangeEvent<HTMLInputElement>) => setHeadersColors(i, e.target.value)} />
+								<div style={{
+									width: "1rem",
+									height: "1rem",
+									borderRadius: "50%",
+									backgroundColor: x.color
+								}}>
+								</div>
+							</div>
+						))
+						}
+					</div>
+				</div>
+			}
+			<div>
+				<p>side headers colors</p>
+				<div>
+					{sideHeaders.map((x, i) => (
+						<div className="flex gap-1 items-center"
+							key={`${x}-${i}-side-headercolor-input`}>
+
+							<Input title={x.header}
+								defaultValue={x.color}
+								type="text"
+								onChange={(e: ChangeEvent<HTMLInputElement>) => setSideHeadersColors(i, e.target.value)} />
+							<div style={{
+								width: "1rem",
+								height: "1rem",
+								borderRadius: "50%",
+								backgroundColor: x.color
+							}}>
+							</div>
+						</div>
+					))
+					}
+				</div>
 			</div>
 		</div>
 	)

@@ -3,17 +3,6 @@ import { useDataContext } from "../../context/DataContext";
 import { useCanvasContext } from "../../context/CanvasContext";
 import { useSetTitles } from "../../hooks/SetTitles";
 
-function getRandomColor() {
-	const letters = '0123456789ABCDEF';
-	let color = '#';
-	for (let i = 0; i < 6; i++) {
-		color += letters[Math.floor(Math.random() * 16)];
-	}
-	return {
-		backgroundColor: color,
-		textColor: getContrastColor(color)
-	};
-}
 
 function hexToRgb(hex: string) {
 	const bigint = parseInt(hex.slice(1), 16);
@@ -94,7 +83,10 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 			canvasCtx.arc(cx, cy, radius, startAngle, endAngle);
 			canvasCtx.lineTo(cx, cy);
 
-			headersColors[i] = getRandomColor();
+			headersColors[i] = {
+				backgroundColor: headers[i].color,
+				textColor: getContrastColor(headers[i].color)
+			};
 			canvasCtx.fillStyle = headersColors[i].backgroundColor;
 			canvasCtx.fill();
 
@@ -130,7 +122,7 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 		let accWidth = 0;
 		let textHeight = 50;
 		for (let i = 0; i < headers.length; i++) {
-			accWidth += (canvasCtx.measureText(headers[i]).width + 24);
+			accWidth += (canvasCtx.measureText(headers[i].header).width + 24);
 			if (accWidth >= width) {
 				accWidth = 0;
 				textHeight += 80;
@@ -150,10 +142,10 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 			canvasCtx.fillRect(xOffset + accWidth, height - yOffset + 40, 10, 10);
 
 			canvasCtx.fillStyle = "#000000";
-			canvasCtx.fillText(headers[i], xOffset + 44 + accWidth,
+			canvasCtx.fillText(headers[i].header, xOffset + 44 + accWidth,
 				height - yOffset + 50);
-			accWidth += (canvasCtx.measureText(headers[i]).width + 24);
-			if (accWidth + canvasCtx.measureText(headers[i]).width * 1.5 >= width) {
+			accWidth += (canvasCtx.measureText(headers[i].header).width + 24);
+			if (accWidth + canvasCtx.measureText(headers[i].header).width * 1.5 >= width) {
 				accWidth = 0;
 				height += 30;
 			}

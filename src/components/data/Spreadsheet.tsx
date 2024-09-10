@@ -37,7 +37,7 @@ export const Spreadsheet: FC<ComponentProps<"div">> = () => {
 								>
 								</div>
 								<input type="text"
-									defaultValue={x}
+									defaultValue={x.header}
 									className={`w-full
 										outline-none
 										hover:outline-blue-400
