@@ -1,9 +1,10 @@
 import { ComponentProps, FC } from "react";
-import { useCanvasContext } from "../../context/CanvasContext";
+import { ChartType, useCanvasContext } from "../../context/CanvasContext";
 
 export const CanvasControl: FC<ComponentProps<"div">> = () => {
 	const { dimenstions, setDimenstions,
-		title, subTitle, setTitle, setSubTitle } = useCanvasContext()
+		title, subTitle, setTitle, setSubTitle,
+		chartType, setChartType } = useCanvasContext()
 
 	return (
 		<div className="fixed right-0 top-0 z-50">
@@ -34,6 +35,26 @@ export const CanvasControl: FC<ComponentProps<"div">> = () => {
 					className="border-2 border-black"
 					type="text" defaultValue={subTitle}
 					onChange={e => setSubTitle(e.target.value)} />
+			</div>
+			<div>
+				<label htmlFor="chart-type">chart type</label>
+				<select name="chart-type" id="chart-type"
+					defaultValue={chartType}
+					onChange={e => setChartType(e.target.value as ChartType)}
+					className="bg-white border-2 border-black">
+					<option value="line">
+						line
+					</option>
+					<option value="v-bar">
+						vertical bar
+					</option>
+					<option value="h-bar">
+						horizontal bar
+					</option>
+					<option value="pie">
+						pie chart
+					</option>
+				</select>
 			</div>
 		</div>
 	)

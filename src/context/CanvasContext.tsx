@@ -1,6 +1,7 @@
 import React, { FC, ComponentProps, useState, useContext, createContext } from "react";
 
 type DimenstionsType = { height: number, width: number }
+export type ChartType = "line" | "v-bar" | "h-bar" | "pie"
 
 type CanvasContextType = {
   dimenstions: DimenstionsType,
@@ -9,6 +10,8 @@ type CanvasContextType = {
   setTitle: React.Dispatch<React.SetStateAction<string>>
   subTitle: string,
   setSubTitle: React.Dispatch<React.SetStateAction<string>>
+  chartType: ChartType
+  setChartType: React.Dispatch<React.SetStateAction<ChartType>>
 }
 
 const INITIAL_STATE: CanvasContextType = {
@@ -18,6 +21,8 @@ const INITIAL_STATE: CanvasContextType = {
   setTitle: () => { },
   subTitle: "sub title",
   setSubTitle: () => { },
+  chartType: "line",
+  setChartType: () => { },
 };
 
 const canvasContext = createContext<CanvasContextType>(INITIAL_STATE);
@@ -27,6 +32,7 @@ export const CanvasContextProvider: FC<ComponentProps<"div">> = ({ children }) =
     height: 500,
     width: 800,
   })
+  const [chartType, setChartType] = useState<ChartType>("line");
   const [title, setTitle] = useState<string>("title");
   const [subTitle, setSubTitle] = useState<string>("sub title");
 
@@ -37,6 +43,8 @@ export const CanvasContextProvider: FC<ComponentProps<"div">> = ({ children }) =
     subTitle,
     setTitle,
     setSubTitle,
+    chartType,
+    setChartType
   } as CanvasContextType
 
   return (
