@@ -4,8 +4,58 @@ import { Button } from "../shared/Button";
 
 
 export const Spreadsheet: FC<ComponentProps<"div">> = () => {
+	//const [isHolding, setIsHolding] = useState<boolean>(false);
+	//const [mousePosition, setMousePosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
+	//const [selectedElemnts, setSelectedElemnts] = useState<[number, number, "x" | "y"]>([0, 0, "x"]);
 	const { headers, sideHeaders, data, onCellChange,
 		onHeaderChange, onSideHeaderChange, addColumn, addRow } = useDataContext();
+	//const tdRef = useRef<HTMLTableCellElement>(null);
+	//const prevMousePosition = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
+
+	/*
+	useEffect(() => {
+		if (!isHolding || !prevMousePosition.current || !tdRef.current) {
+			return
+		}
+		const xDiff = mousePosition.x - prevMousePosition.current.x;
+		const yDiff = mousePosition.y - prevMousePosition.current.y;
+		const boundingRect = tdRef.current.getBoundingClientRect();
+		const diffX = Math.abs(boundingRect.x - mousePosition.x);
+		const diffY = Math.abs(boundingRect.y - mousePosition.y);
+		if (Math.abs(xDiff) > Math.abs(yDiff)) {
+			setSelectedElemnts([Math.floor(diffX / boundingRect.width),
+			Math.floor(diffY / boundingRect.height),
+				"x"]);
+		} else {
+
+		}
+
+	}, [isHolding, mousePosition.x, mousePosition.y])
+
+	useEffect(() => {
+		function mouseMove(e: MouseEvent) {
+			prevMousePosition.current = mousePosition;
+			setMousePosition({ x: e.clientX, y: e.clientY });
+		}
+		function mouseUp(_: MouseEvent) {
+			setIsHolding(false);
+		}
+		if (isHolding) {
+			window.addEventListener("mousemove", mouseMove);
+			window.addEventListener("mouseup", mouseUp);
+		} else {
+			window.removeEventListener("mousemove", mouseMove);
+			window.removeEventListener("mouseup", mouseUp);
+		}
+
+		return () => {
+			window.removeEventListener("mousemove", mouseMove);
+			window.removeEventListener("mouseup", mouseUp);
+		}
+
+
+	}, [isHolding])
+	*/
 
 	return (
 		<div className="flex flex-col gap-2">

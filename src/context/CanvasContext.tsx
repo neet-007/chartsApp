@@ -18,6 +18,8 @@ type CanvasContextType = {
   setCanvasBg: React.Dispatch<React.SetStateAction<string>>
   showDataInChart: boolean
   setShowDataInChart: React.Dispatch<React.SetStateAction<boolean>>
+  radius: number,
+  setRadius: React.Dispatch<React.SetStateAction<number>>
 }
 
 const INITIAL_STATE: CanvasContextType = {
@@ -34,7 +36,9 @@ const INITIAL_STATE: CanvasContextType = {
   canvasBg: "grey",
   setCanvasBg: () => { },
   showDataInChart: true,
-  setShowDataInChart: () => { }
+  setShowDataInChart: () => { },
+  radius: 50,
+  setRadius: () => { },
 };
 
 const canvasContext = createContext<CanvasContextType>(INITIAL_STATE);
@@ -45,11 +49,12 @@ export const CanvasContextProvider: FC<ComponentProps<"div">> = ({ children }) =
     width: 800,
   })
   const [showDataInChart, setShowDataInChart] = useState<boolean>(true);
-  const [canvasBg, setCanvasBg] = useState<string>("gray");
+  const [canvasBg, setCanvasBg] = useState<string>("white");
   const [chartType, setChartType] = useState<ChartType>("line");
   const [pieChartRow, setPieChartRow] = useState<number>(0);
   const [title, setTitle] = useState<string>("title");
   const [subTitle, setSubTitle] = useState<string>("sub title");
+  const [radius, setRadius] = useState<number>(100);
 
   const value = {
     dimenstions,
@@ -65,7 +70,9 @@ export const CanvasContextProvider: FC<ComponentProps<"div">> = ({ children }) =
     canvasBg,
     setCanvasBg,
     showDataInChart,
-    setShowDataInChart
+    setShowDataInChart,
+    radius,
+    setRadius,
   } as CanvasContextType
 
   return (
