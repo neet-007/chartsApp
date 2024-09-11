@@ -11,6 +11,8 @@ type DataContextType = {
   onSideHeaderChange: (cell: number, v: string) => void;
   setSideHeadersColors: (t: number, color: string) => void;
   setHeadersColors: (t: number, color: string) => void;
+  addColumn: () => void;
+  addRow: () => void;
 }
 
 const INITIAL_STATE: DataContextType = {
@@ -23,6 +25,8 @@ const INITIAL_STATE: DataContextType = {
   onSideHeaderChange: () => { },
   setSideHeadersColors: () => { },
   setHeadersColors: () => { },
+  addColumn: () => { },
+  addRow: () => { },
 };
 
 const HEADERS = [
@@ -123,6 +127,30 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
     setSideHeaders(prev => prev.map((x, i) => i === t ? { ...x, color } : x))
   }
 
+  function addColumn() {
+    setHeaders(prev => {
+      const newPrev = [...prev];
+      newPrev.push({ header: `header${newPrev.length}`, color: generateRandomColor() });
+      return newPrev
+    });
+    setData(prev => {
+      return prev.map(row => [...row, Math.floor(Math.random() * 100)]);
+    });
+  }
+
+  function addRow() {
+    setSideHeaders(prev => {
+      const newPrev = [...prev];
+      newPrev.push({ header: `side_header${newPrev.length}`, color: generateRandomColor() });
+      return newPrev
+    });
+    setData(prev => {
+      const newPrev = [...prev];
+      newPrev.push(Array.from({ length: newPrev[0].length }).map(() => Math.floor(Math.random() * 100)));
+      return newPrev
+    })
+  }
+
   const value = {
     headers,
     sideHeaders,
@@ -133,6 +161,8 @@ export const DataContextProvider: FC<ComponentProps<"div">> = ({ children }) => 
     onSideHeaderChange,
     setHeadersColors,
     setSideHeadersColors,
+    addColumn,
+    addRow
   } as DataContextType
 
   return (

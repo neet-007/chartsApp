@@ -8,7 +8,7 @@ import { canvasDownload } from "../../utils/canvasDownload";
 
 export const HBarChart: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data, minMaxHeap } = useDataContext();
-	const { dimenstions, title, subTitle, canvasBg } = useCanvasContext();
+	const { dimenstions, title, subTitle, canvasBg, showDataInChart } = useCanvasContext();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useSetTitles(canvasRef, title, subTitle);
@@ -154,10 +154,12 @@ export const HBarChart: FC<ComponentProps<"div">> = () => {
 				const x = xOffset;
 				const metrics = canvasCtx.measureText(`${data[i][j]}`);
 				const textHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-				if (j === 0) {
-					canvasCtx.fillText(`${data[i][j]}`, x + barWidth, y + (textHeight / 2));
-				} else {
-					canvasCtx.fillText(`${data[i][j]}`, x + (metrics.width / 2) + barWidth, y + (textHeight / 2));
+				if (showDataInChart) {
+					if (j === 0) {
+						canvasCtx.fillText(`${data[i][j]}`, x + barWidth, y + (textHeight / 2));
+					} else {
+						canvasCtx.fillText(`${data[i][j]}`, x + (metrics.width / 2) + barWidth, y + (textHeight / 2));
+					}
 				}
 			}
 		}
@@ -213,7 +215,7 @@ export const HBarChart: FC<ComponentProps<"div">> = () => {
 			canvasCtx.shadowOffsetX = 0;
 			canvasCtx.shadowOffsetY = 0;
 		}
-	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width]);
+	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width, showDataInChart]);
 	return (<div>
 		<canvas style={{ backgroundColor: canvasBg }}
 			width={dimenstions.width} height={dimenstions.height}

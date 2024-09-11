@@ -9,7 +9,7 @@ import { canvasDownload } from "../../utils/canvasDownload";
 
 export const LineChart: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data, minMaxHeap } = useDataContext();
-	const { dimenstions, title, subTitle, canvasBg } = useCanvasContext();
+	const { dimenstions, title, subTitle, canvasBg, showDataInChart } = useCanvasContext();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useSetTitles(canvasRef, title, subTitle);
@@ -114,14 +114,18 @@ export const LineChart: FC<ComponentProps<"div">> = () => {
 
 			line.moveTo(xOffset, initialY);
 
-			canvasCtx.fillText(data[i][0].toString(), xOffset, initialY - textHeightMap[i][0] / 2);
+			if (showDataInChart) {
+				canvasCtx.fillText(data[i][0].toString(), xOffset, initialY - textHeightMap[i][0] / 2);
+			}
 
 			for (let j = 1; j < data[i].length; j++) {
 				const x = xOffset + j * multX;
 				const y = yOffset + (1 - data[i][j] / maxVal) * (height - 2 * yOffset);
 				line.lineTo(x, y);
 
-				canvasCtx.fillText(data[i][j].toString(), x, y - textHeightMap[i][j] / 2);
+				if (showDataInChart) {
+					canvasCtx.fillText(data[i][j].toString(), x, y - textHeightMap[i][j] / 2);
+				}
 			}
 
 			canvasCtx.globalCompositeOperation = 'source-over';
@@ -187,7 +191,7 @@ export const LineChart: FC<ComponentProps<"div">> = () => {
 			canvasCtx.shadowOffsetX = 0;
 			canvasCtx.shadowOffsetY = 0;
 		}
-	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width]);
+	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width, showDataInChart]);
 
 	return (<div>
 		<canvas style={{ backgroundColor: canvasBg }}

@@ -34,7 +34,7 @@ function getContrastColor(hex: string) {
 
 export const PieChart: FC<ComponentProps<"div">> = () => {
 	const { headers, sideHeaders, data, minMaxHeap } = useDataContext();
-	const { dimenstions, title, subTitle, pieChartRow, canvasBg } = useCanvasContext();
+	const { dimenstions, title, subTitle, pieChartRow, canvasBg, showDataInChart } = useCanvasContext();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useSetTitles(canvasRef, title, subTitle);
@@ -107,7 +107,7 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 			canvasCtx.lineTo(endX, endY);
 			canvasCtx.stroke();
 
-			if (data[pieChartRow][i] > 0) {
+			if (data[pieChartRow][i] > 0 && showDataInChart) {
 				const middleAngle = startAngle + (endAngle - startAngle) / 2;
 				const textX = cx + (radius / 2) * Math.cos(middleAngle);
 				const textY = cy + (radius / 2) * Math.sin(middleAngle);
@@ -164,7 +164,7 @@ export const PieChart: FC<ComponentProps<"div">> = () => {
 			canvasCtx.shadowOffsetY = 0;
 		}
 	}, [canvasRef, data, headers, sideHeaders, dimenstions.height, dimenstions.width,
-		pieChartRow]);
+		pieChartRow, showDataInChart]);
 
 	return (<div>
 		<canvas style={{ backgroundColor: canvasBg }}

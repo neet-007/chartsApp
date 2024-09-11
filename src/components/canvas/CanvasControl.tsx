@@ -7,7 +7,7 @@ export const CanvasControl: FC<ComponentProps<"div">> = () => {
 	const { dimenstions, setDimenstions,
 		title, subTitle, setTitle, setSubTitle,
 		chartType, setChartType, pieChartRow, setPieChartRow, canvasBg,
-		setCanvasBg } = useCanvasContext()
+		setCanvasBg, showDataInChart, setShowDataInChart } = useCanvasContext()
 	const { headers, sideHeaders, setSideHeadersColors, setHeadersColors, data } = useDataContext();
 
 	return (
@@ -34,6 +34,11 @@ export const CanvasControl: FC<ComponentProps<"div">> = () => {
 				type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => {
 					setCanvasBg(e.target.value)
 				}} />
+			<div>
+				<label htmlFor="show data in chart">show data in chart</label>
+				<input type="checkbox" id="show data in chart" name="show data in chart"
+					defaultChecked={showDataInChart} onChange={e => setShowDataInChart(e.target.checked)} />
+			</div>
 
 			{chartType === "pie" &&
 				<div>

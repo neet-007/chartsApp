@@ -16,6 +16,8 @@ type CanvasContextType = {
   setPieChartRow: React.Dispatch<React.SetStateAction<number>>
   canvasBg: string,
   setCanvasBg: React.Dispatch<React.SetStateAction<string>>
+  showDataInChart: boolean
+  setShowDataInChart: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const INITIAL_STATE: CanvasContextType = {
@@ -31,6 +33,8 @@ const INITIAL_STATE: CanvasContextType = {
   setPieChartRow: () => { },
   canvasBg: "grey",
   setCanvasBg: () => { },
+  showDataInChart: true,
+  setShowDataInChart: () => { }
 };
 
 const canvasContext = createContext<CanvasContextType>(INITIAL_STATE);
@@ -40,6 +44,7 @@ export const CanvasContextProvider: FC<ComponentProps<"div">> = ({ children }) =
     height: 500,
     width: 800,
   })
+  const [showDataInChart, setShowDataInChart] = useState<boolean>(true);
   const [canvasBg, setCanvasBg] = useState<string>("gray");
   const [chartType, setChartType] = useState<ChartType>("line");
   const [pieChartRow, setPieChartRow] = useState<number>(0);
@@ -59,6 +64,8 @@ export const CanvasContextProvider: FC<ComponentProps<"div">> = ({ children }) =
     setPieChartRow,
     canvasBg,
     setCanvasBg,
+    showDataInChart,
+    setShowDataInChart
   } as CanvasContextType
 
   return (
